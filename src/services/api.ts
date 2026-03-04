@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = "https://user-identity-service.onrender.com/api/users";
+// Vite requires the 'VITE_' prefix to expose variables to your code
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const registerUser = (userData: any) => axios.post(`${API_BASE_URL}/register`, userData);
 export const loginUser = (credentials: any) => axios.post(`${API_BASE_URL}/login`, credentials);

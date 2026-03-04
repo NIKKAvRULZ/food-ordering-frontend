@@ -15,15 +15,17 @@ const Register: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage('');
+        setMessage('Connecting to cloud server... (This may take up to 1 minute if the service is waking up)');
         
         try {
             const response = await registerUser(formData);
-            setMessage(`✅ Registration Successful! User ID: ${response.data.id}`);
-            console.log("Backend Response:", response.data);
+            setMessage(`✅ Success! User ID: ${response.data.id}`);
         } catch (error: any) {
-            setMessage("❌ Connection Error: Ensure backend is live on Render.");
-            console.error("Registration Error:", error);
+            if (error.code === 'ECONNABORTED' || !error.response) {
+                setMessage("⚠️ Server is taking a while to wake up. Please wait a moment and try again.");
+            } else {
+                setMessage(`❌ Error: ${error.response?.data || "Registration failed"}`);
+            }
         } finally {
             setLoading(false);
         }
