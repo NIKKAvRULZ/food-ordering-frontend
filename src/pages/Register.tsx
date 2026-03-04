@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { User } from '../types/user';
+import { registerUser } from '../services/api';
 
 const Register: React.FC = () => {
     const [formData, setFormData] = useState<User>({
@@ -14,26 +15,29 @@ const Register: React.FC = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage(''); // Clear previous messages
+    e.preventDefault();
+    setLoading(true);
+    setMessage(''); 
+    
+    try {
+        // CRITICAL FIX: Add the actual API call
+        console.log("Sending to Backend:", formData); 
+        await registerUser(formData); 
         
-        try {
-            console.log("Sending to Backend:", formData); 
-            setMessage('✅ Registration Successful! Redirecting to login...');
-            
-            // Auto-redirect after success to improve UX
-            setTimeout(() => {
-                navigate('/login');
-            }, 2500);
-        } catch (error: any) {
-            // Reads the "message" key from your GlobalExceptionHandler.java
-            const serverMessage = error.response?.data?.message || "An unexpected error occurred.";
-            setMessage(`❌ ${serverMessage}`);
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Only show success if the backend returns a 200 OK
+        setMessage('✅ Registration Successful! Redirecting to login...');
+        
+        setTimeout(() => {
+            navigate('/login');
+        }, 2500);
+    } catch (error: any) {
+        // This will now catch the "Registration Conflict" from your Java Exception Handler
+        const serverMessage = error.response?.data?.message || "An unexpected error occurred.";
+        setMessage(`❌ ${serverMessage}`);
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div style={{ 
