@@ -1,41 +1,35 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import Profile from './pages/Profile';
+import { AuthProvider } from './context/AuthContext';
 import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="app-container">
+      <AuthProvider>
         <nav className="navbar">
-          <div className="nav-brand">
-            <h1>Identity Service</h1>
-          </div>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/register">Register</Link>
-            <Link to="/login">Login</Link>
+          <div className="brand-text">Gourmet.Express</div>
+          <div className="nav-links" style={{ display: 'flex', gap: '30px' }}>
+            <Link to="/" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Network</Link>
+            <Link to="/login" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Login</Link>
+            <Link to="/register" className="btn-gold" style={{ padding: '8px 20px' }}>Join</Link>
           </div>
         </nav>
-
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile/:id" element={<Profile />} />
-          </Routes>
-        </main>
-        
-        <footer className="footer">
-        </footer>
-      </div>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile/:id" element={<Profile />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
-}
+};
 
 export default App;

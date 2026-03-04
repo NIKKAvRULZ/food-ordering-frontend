@@ -1,287 +1,94 @@
-/* --- Modern Design System --- */
 :root {
-  --bg-dark: #0f172a;           /* Deep Slate */
-  --card-bg: rgba(30, 41, 59, 0.7); /* Translucent Slate */
-  --accent-gold: #fbbf24;       /* Elegant Gold */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --success: #22c55e;
-  --glass-border: rgba(255, 255, 255, 0.1);
-}
-
-* {
-  box-sizing: border-box;
-  transition: all 0.3s ease;
+  --bg-deep: #05070a;
+  --accent-gold: #d4af37;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --success: #10b981;
 }
 
 body {
   margin: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif; /* Clean, modern font */
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  line-height: 1.6;
-}
-
-/* --- Layout --- */
-.app-container {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-deep);
+  background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg-deep));
+  color: var(--text-main);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
+/* Glassmorphism Panels */
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  padding: 40px;
+}
+
+/* Nav & Branding */
 .navbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 8%;
-  background: rgba(15, 23, 42, 0.8);
+  padding: 25px 8%;
+  background: rgba(5, 7, 10, 0.8);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
 }
 
-.nav-brand h1 {
-  font-size: 1.25rem;
-  letter-spacing: -0.5px;
-  color: var(--accent-gold);
-}
-
-.nav-links a {
-  color: var(--text-secondary);
-  text-decoration: none;
-  margin-left: 2rem;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.nav-links a:hover {
-  color: var(--accent-gold);
-}
-
-/* --- Hero & Dashboard Sections --- */
-.content {
-  flex: 1;
-  padding: 4rem 8%;
-}
-
-.landing-container {
-  text-align: center;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(34, 197, 94, 0.1);
-  color: var(--success);
-  padding: 6px 16px;
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 700;
+.brand-text {
+  font-size: 1.2rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  margin-bottom: 2rem;
-}
-
-h1 {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(to right, #fff, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* --- Service Mesh Cards (Creative Component) --- */
-.service-hub {
-  margin-top: 5rem;
-}
-
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.service-node {
-  background: var(--card-bg);
-  border: 1px solid var(--glass-border);
-  padding: 2.5rem;
-  border-radius: 24px;
-  text-align: left;
-  backdrop-filter: blur(12px);
-}
-
-.service-node.active {
-  border-color: rgba(251, 191, 36, 0.3);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-}
-
-.service-node.active .node-icon {
   color: var(--accent-gold);
+  font-weight: 800;
 }
 
-.node-icon {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  display: block;
+/* Buttons */
+.btn-gold {
+  background: var(--accent-gold);
+  color: #000;
+  padding: 12px 30px;
+  border-radius: 100px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.service-node h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
 }
 
-.service-node p {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin: 0;
+/* Status Indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
 }
+.online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+.checking { background: #64748b; }
+.offline { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
 
-/* --- Forms (Login/Register) --- */
-.form-container {
-  background: var(--card-bg);
-  border: 1px solid var(--glass-border);
-  padding: 3rem;
-  border-radius: 32px;
-  max-width: 450px;
-  margin: 0 auto;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
+/* Form Elements */
 input {
   width: 100%;
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.5);
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: 14px;
   color: white;
-  margin-bottom: 1.5rem;
+  margin-top: 8px;
 }
 
 input:focus {
   outline: none;
   border-color: var(--accent-gold);
-}
-
-/* --- Buttons --- */
-.btn-primary, button[type="submit"] {
-  background: var(--accent-gold);
-  color: #000;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);
-}
-
-.btn-outline {
-  border: 1px solid var(--glass-border);
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  text-decoration: none;
-  margin-left: 1rem;
-}
-
-:root {
-  --bg: #050505;
-  --accent: #ffffff;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --online: #00ff88;
-  --offline: #ff4444;
-}
-
-body {
-  background: var(--bg);
-  color: #fff;
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-image: radial-gradient(circle at 50% -20%, #1a1a1a, #050505);
-  height: 100vh;
-}
-
-.glass-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 90vh;
-}
-
-h1 {
-  font-size: 4rem;
-  font-weight: 200;
-  letter-spacing: -2px;
-  margin-bottom: 0;
-}
-
-/* Glassmorphism Panel */
-.monitor-panel {
-  margin-top: 50px;
-  padding: 20px 40px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  display: flex;
-  gap: 30px;
-}
-
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px currentColor;
-}
-
-.online { color: var(--online); background: var(--online); }
-.offline { color: var(--offline); background: var(--offline); }
-.checking { color: #888; background: #888; }
-
-/* Buttons */
-.glass-btn {
-  padding: 12px 30px;
-  border-radius: 100px;
-  text-decoration: none;
-  color: #fff;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  transition: 0.3s;
-  font-size: 0.9rem;
-}
-
-.glass-btn.primary {
-  background: #fff;
-  color: #000;
-}
-
-.glass-btn:hover {
-  background: rgba(255,255,255,0.15);
-  transform: translateY(-2px);
 }
