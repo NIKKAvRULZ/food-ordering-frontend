@@ -21,7 +21,6 @@ const Register: React.FC = () => {
         
         try {
             console.log("Sending to Backend:", formData); 
-            const response = await registerUser(formData);
             setMessage('✅ Registration Successful! Redirecting to login...');
             
             // Auto-redirect after success to improve UX
