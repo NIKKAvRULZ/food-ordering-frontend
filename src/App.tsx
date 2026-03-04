@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import Landing from './pages/Landing';
 import './App.css';
 
 const App: React.FC = () => {
@@ -23,7 +24,7 @@ const App: React.FC = () => {
 
         <main className="content">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Landing />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile/:id" element={<Profile />} />
@@ -31,7 +32,6 @@ const App: React.FC = () => {
         </main>
         
         <footer className="footer">
-          <p>SLIIT SE4010 - Current Trends in Software Engineering</p>
         </footer>
       </div>
     </Router>
