@@ -92,3 +92,14 @@ input:focus {
   outline: none;
   border-color: var(--accent-gold);
 }
+
+/* Update these in your existing App.css */
+.status-dot.live { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+.status-dot.pending { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; animation: pulse 2s infinite; }
+.status-dot.down { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}

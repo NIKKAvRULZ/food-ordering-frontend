@@ -5,20 +5,31 @@ const AuthContext = createContext<any>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user') || 'null'));
-  const [statuses, setStatuses] = useState({ identity: 'checking', orders: 'offline', catalog: 'offline' });
+  // Initial state is 'pending' to reflect the build/wakeup phase
+  const [statuses, setStatuses] = useState({ identity: 'pending', orders: 'pending', catalog: 'pending' });
 
   useEffect(() => {
     const monitorServices = async () => {
       try {
-        // Pings your Render backend to check live status
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/1`);
-        setStatuses(prev => ({ ...prev, identity: res.status === 200 ? 'online' : 'offline' }));
-      } catch {
-        setStatuses(prev => ({ ...prev, identity: 'offline' }));
+        // Set a short timeout to detect if the server is "Pending" (waking up)
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/1`, { timeout: 5000 });
+        
+        if (res.status === 200) {
+          setStatuses(prev => ({ ...prev, identity: 'live' }));
+        }
+      } catch (error: any) {
+        if (error.code === 'ECONNABORTED') {
+          // If the request times out, it's likely still waking up/building
+          setStatuses(prev => ({ ...prev, identity: 'pending' }));
+        } else {
+          // If the request is actively refused, the service is down
+          setStatuses(prev => ({ ...prev, identity: 'down' }));
+        }
       }
     };
+
     monitorServices();
-    const interval = setInterval(monitorServices, 30000);
+    const interval = setInterval(monitorServices, 15000); // Check every 15s
     return () => clearInterval(interval);
   }, []);
 
