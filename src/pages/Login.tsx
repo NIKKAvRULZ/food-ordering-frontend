@@ -10,12 +10,14 @@ const Login: React.FC = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await loginUser(credentials);
-            // On success, navigate to profile using the ID returned by the backend
+            // Double check if your backend expects "email" or "username" for login
+            const response = await loginUser(credentials); 
             console.log("Login Success:", response.data);
             navigate(`/profile/${response.data.id}`); 
         } catch (err: any) {
-            setError("Invalid credentials. Please check your email/password.");
+            // Detailed error logging
+            console.error("Login Error Response:", err.response?.data);
+            setError("Invalid credentials or Bad Request.");
         }
     };
 
