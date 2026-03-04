@@ -27,6 +27,7 @@ const Landing: React.FC = () => {
           <StatusItem label="Identity Node" status={statuses.identity} />
           <StatusItem label="Catalog Node" status={statuses.catalog} />
           <StatusItem label="Order Node" status={statuses.orders} />
+          <StatusItem label="Payment Node" status={statuses.payment} />
         </div>
       </div>
     </div>

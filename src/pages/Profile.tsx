@@ -81,7 +81,7 @@ const Profile: React.FC = () => {
 
                 {/* Footer Actions */}
                 <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '30px', display: 'flex', gap: '15px' }}>
-                    <button className="btn-gold" style={{ flex: 2 }} onClick={() => navigate('/menu')}>Start Ordering</button>
+                    <button className="btn-gold" style={{ flex: 2 }} onClick={() => navigate('/home')}>Start Ordering</button>
                     <button 
                         className="btn-gold" 
                         style={{ flex: 1, background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}

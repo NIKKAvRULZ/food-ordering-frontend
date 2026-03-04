@@ -27,7 +27,7 @@ const App: React.FC = () => {
               <Route path="/" element={<Landing />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/home" element={<Home />} /> {/* Added route to fix TS6133 */}
+              <Route path="/home" element={<Home />} /> 
               <Route path="/profile/:id" element={<Profile />} />
             </Routes>
           </main>
