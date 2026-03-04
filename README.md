@@ -64,3 +64,6 @@ This frontend serves as the central orchestrator for the following nodes:
 * **Identity Node:*** (Live) Handles Secure Auth & Profile Management.
 * **Catalog Node:** (Pending) Product management and menu integration.
 * **Order Node:** (Pending) Transactional service and order tracking.
+
+--- 
+Developed with ❤️ by **NIKKA**
