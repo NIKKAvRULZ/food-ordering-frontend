@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { registerUser } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import type { User } from '../types/user';
 
