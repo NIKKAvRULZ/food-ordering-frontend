@@ -38,25 +38,6 @@ src/
 ├── types/         # TypeScript interfaces for User and Order models
 └── App.css        # Custom Glassmorphism design system
 ```
-
-# Gourmet Express | Frontend Microservice
-
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite)
-![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
-
-**Gourmet Express** is a luxury food delivery platform built with a distributed microservice architecture. This frontend acts as the central hub for user identity and network monitoring.
-
----
-
-## 💎 Design Philosophy
-The UI is inspired by premium automotive and product design aesthetics, focusing on:
-* **Glassmorphism Panels**: Translucent layers with backdrop-blur effects.
-* **Luxury Palette**: A deep slate and gold color system (`#d4af37`).
-* **Real-time Monitoring**: A dynamic "Network Status Hub" that pings backend nodes to show Live/Pending/Down states.
-
-
 ---
 ## ⚙️ Setup & Installation
 
