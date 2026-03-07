@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Landing: React.FC = () => {
-  const { statuses } = useAuth();
+  const { statuses } = useAuth(); // Accessing dynamic status from AuthContext
 
   return (
     <div className="landing-container" style={{ textAlign: 'center', padding: '100px 8%' }}>
@@ -21,21 +21,28 @@ const Landing: React.FC = () => {
 
       <div className="glass-panel" style={{ marginTop: '80px', maxWidth: '800px', margin: '80px auto' }}>
         <h4 style={{ textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem', marginBottom: '30px', opacity: 0.7 }}>
-          Network Status Hub
+          Live Network Status Hub
         </h4>
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+          {/* Dynamic Status Mapping */}
           <StatusItem label="Identity Node" status={statuses.identity} />
           <StatusItem label="Catalog Node" status={statuses.catalog} />
           <StatusItem label="Order Node" status={statuses.orders} />
-          <StatusItem label="Payment Node" status={statuses.payment} />
+          <StatusItem label="Payment Node" status={statuses.payment || 'pending'} />
         </div>
+        
+        {/* Dynamic Handshake Confirmation Badge */}
+        {statuses.identity === 'live' && statuses.catalog === 'live' && (
+          <div style={{ marginTop: '25px', color: '#22c55e', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1px' }}>
+            ✓ INTER-SERVICE HANDSHAKE ESTABLISHED 
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 const StatusItem = ({ label, status }: { label: string; status: string }) => {
-  // Map internal status keys to display labels and colors
   const statusConfig: any = {
     live: { color: '#22c55e', label: 'LIVE' },
     pending: { color: '#fbbf24', label: 'PENDING' },
@@ -52,8 +59,8 @@ const StatusItem = ({ label, status }: { label: string; status: string }) => {
           height: '10px', 
           borderRadius: '50%', 
           backgroundColor: current.color,
-          boxShadow: `0 0 12px ${current.color}`,
-          transition: 'all 0.5s ease'
+          boxShadow: `0 0 15px ${current.color}`, // Increased glow for visual impact
+          transition: 'all 0.5s ease-in-out'
         }}></div>
         <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.5px' }}>{current.label}</span>
       </div>

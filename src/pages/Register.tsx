@@ -8,7 +8,8 @@ const Register: React.FC = () => {
         username: '',
         email: '',
         password: '',
-        deliveryAddress: ''
+        deliveryAddress: '',
+        recommendation: '' // This field is required by the backend, so we initialize it as an empty string
     });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);

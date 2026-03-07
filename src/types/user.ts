@@ -3,5 +3,6 @@ export interface User {
     username: string;
     email: string;
     password?: string;
-    deliveryAddress: string; 
+    deliveryAddress: string;
+    recommendation: string;
 }
