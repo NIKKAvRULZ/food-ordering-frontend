@@ -45,7 +45,7 @@ const Register: React.FC = () => {
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
-            padding: '60px 20px',
+            padding: '0px 20px',
             minHeight: 'calc(100vh - 100px)' 
         }}>
             <div className="glass-panel" style={{ 
@@ -63,55 +63,55 @@ const Register: React.FC = () => {
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: '1fr 1fr', 
-                        gap: '20px' 
+                        gap: '16px' 
                     }}>
-                        <div className="form-group">
-                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Username</label>
+                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Username</label>
                             <input 
                                 type="text" 
                                 placeholder="Nikka99"
                                 value={formData.username}
                                 onChange={(e) => setFormData({...formData, username: e.target.value})}
                                 required 
-                                style={{ marginTop: '8px' }}
+                                style={{ width: '100%', boxSizing: 'border-box' }}
                             />
                         </div>
-                        <div className="form-group">
-                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Email</label>
+                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Email</label>
                             <input 
                                 type="email" 
                                 placeholder="name@email.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 required 
-                                style={{ marginTop: '8px' }}
+                                style={{ width: '100%', boxSizing: 'border-box' }}
                             />
                         </div>
                     </div>
 
                     {/* Row 2: Password */}
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Password</label>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Password</label>
                         <input 
                             type="password" 
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={(e) => setFormData({...formData, password: e.target.value})}
                             required 
-                            style={{ marginTop: '8px' }}
+                            style={{ width: '100%', boxSizing: 'border-box' }}
                         />
                     </div>
 
                     {/* Row 3: Delivery Address */}
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Delivery Address</label>
+                    <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Delivery Address</label>
                         <input 
                             type="text" 
                             placeholder="Street, City, Country"
                             value={formData.deliveryAddress}
                             onChange={(e) => setFormData({...formData, deliveryAddress: e.target.value})}
                             required 
-                            style={{ marginTop: '8px' }}
+                            style={{ width: '100%', boxSizing: 'border-box' }}
                         />
                     </div>
 

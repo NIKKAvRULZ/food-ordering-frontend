@@ -6,7 +6,7 @@ const Landing: React.FC = () => {
   const { statuses } = useAuth(); // Accessing dynamic status from AuthContext
 
   return (
-    <div className="landing-container" style={{ textAlign: 'center', padding: '100px 8%' }}>
+    <div className="landing-container" style={{ textAlign: 'center', padding: '0px 8%' }}>
       <h1 style={{ fontSize: '4.5rem', fontWeight: 200, letterSpacing: '-3px' }}>
         GOURMET<span style={{color: 'var(--accent-gold)'}}>EXPRESS</span>
       </h1>

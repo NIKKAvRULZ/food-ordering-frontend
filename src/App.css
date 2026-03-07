@@ -85,7 +85,7 @@ input {
   border: 1px solid var(--glass-border);
   border-radius: 14px;
   color: white;
-  margin-top: 8px;
+  box-sizing: border-box;
 }
 
 input:focus {
