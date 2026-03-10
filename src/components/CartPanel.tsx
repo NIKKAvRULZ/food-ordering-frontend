@@ -43,11 +43,22 @@ const CartPanel: React.FC = () => {
                 }))
             };
             
-            await axios.post(`${ORDER_URL}/orders`, orderPayload);
+            const response = await axios.post(`${ORDER_URL}/orders`, orderPayload);
+            const newOrderId = response.data?.orderId || response.data?.id;
+
+            // Trigger Pending Order Payment Email notification
+            if (newOrderId) {
+                 try {
+                     const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_URL;
+                     await axios.get(`${NOTIFICATION_URL}/api/v1/notify/order-pending/${user.id || user._id}/${newOrderId}`);
+                 } catch (notifErr) {
+                     console.error("Failed to queue email notification:", notifErr);
+                 }
+            }
 
             clearCart();
             setCartOpen(false);
-            navigate('/home'); 
+            navigate(`/payments/checkout/${newOrderId}`); 
             alert('Gourmet order synchronized successfully!');
         } catch (err: any) {
             console.error("Order Failure Trace:", err);
