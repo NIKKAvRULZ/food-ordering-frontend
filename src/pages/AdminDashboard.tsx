@@ -144,14 +144,18 @@ const AdminDashboard: React.FC = () => {
         );
 
       case 'orders':
-        return renderTable(['Order ID', 'Items', 'Amount', 'Status', 'Date', 'Actions'], data.map(order => [
-          String(order.id).substring(0, 8),
-          order.items?.length || 0,
-          `LKR ${order.totalAmount?.toFixed(2)}`,
-          <span style={{ color: order.status === 'COMPLETED' ? '#4ade80' : '#fbbf24' }}>{order.status}</span>,
-          new Date(order.orderDate).toLocaleDateString(),
-          <button onClick={() => handleDelete(order.id)} style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: 'none', padding: '5px 12px', borderRadius: '6px' }}>Cancel</button>
-        ]));
+        return renderTable(['Order Ref', 'Description', 'Quantity', 'Total Value', 'Status', 'Actions'], data.map(order => {
+          const statusText = (order.status || 'PENDING').toUpperCase();
+          const statusColor = statusText === 'COMPLETED' ? '#4ade80' : statusText === 'CANCELLED' ? '#ef4444' : '#fbbf24';
+          return [
+            String(order.id || order._id).substring(0, 8).toUpperCase(),
+            order.product || 'Complex Order',
+            order.quantity || 0,
+            `LKR ${Number(order.totalAmount || order.price || 0).toLocaleString()}`,
+            <span style={{ color: statusColor, fontWeight: 700, fontSize: '0.75rem', letterSpacing: '1px' }}>{statusText}</span>,
+            <button key="action" onClick={() => handleDelete(order.id || order._id)} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 15px', borderRadius: '100px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Revoke</button>
+          ];
+        }));
 
       case 'payments':
         return renderTable(['Tx ID', 'Order', 'Amount', 'Status', 'Method', 'Actions'], data.map(pay => [
