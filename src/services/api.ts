@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = `${import.meta.env.VITE_IDENTITY_URL}/api/users`;
-const CATALOG_URL = import.meta.env.VITE_CATALOG_URL;
-const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_URL;
+const isDev = import.meta.env.DEV;
+const API_BASE_URL = isDev ? `/proxy/identity/api/users` : `${import.meta.env.VITE_IDENTITY_URL}/api/users`;
+const CATALOG_URL = isDev ? `/proxy/catalog` : import.meta.env.VITE_CATALOG_URL;
+const NOTIFICATION_URL = isDev ? `/proxy/notification` : import.meta.env.VITE_NOTIFICATION_URL;
 
 // Intercept requests to add JWT Token Auth Header
 axios.interceptors.request.use((config) => {

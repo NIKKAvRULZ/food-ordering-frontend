@@ -12,7 +12,9 @@ import { createPayment } from '../services/paymentApi';
 import type { OrderInfo } from '../types/payment';
 import axios from 'axios';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 // ---------- inner form ----------
 const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess: (paymentId: string) => void }> = ({
@@ -172,8 +174,10 @@ const PaymentCheckout: React.FC = () => {
     setFetching(true);
     setFetchError('');
     try {
+      const isDev = import.meta.env.DEV;
+      const orderUrl = isDev ? `/proxy/order` : import.meta.env.VITE_ORDER_URL;
       const res = await axios.get<OrderInfo>(
-        `${import.meta.env.VITE_ORDER_URL}/orders/${id}`
+        `${orderUrl}/orders/${id}`
       );
       setOrderInfo(res.data);
       setStep('confirm');

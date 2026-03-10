@@ -6,7 +6,8 @@ import type {
   RefundPayload,
 } from '../types/payment';
 
-const BASE_URL = `${import.meta.env.VITE_PAYMENT_URL}/api/payments`;
+const isDev = import.meta.env.DEV;
+const BASE_URL = isDev ? `/proxy/payment/api/payments` : `${import.meta.env.VITE_PAYMENT_URL}/api/payments`;
 
 // Reuse JWT interceptor already registered in api.ts (axios global)
 
