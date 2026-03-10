@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = `${import.meta.env.VITE_IDENTITY_URL}/api/users`;
 const CATALOG_URL = import.meta.env.VITE_CATALOG_URL;
+const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_URL;
 
 // Intercept requests to add JWT Token Auth Header
 axios.interceptors.request.use((config) => {
@@ -18,6 +19,6 @@ export const getUserProfile = (id: number | string) => axios.get(`${API_BASE_URL
 export const getOrderStatus = (id: number | string) => axios.get(`${API_BASE_URL}/${id}/order-status`);
 export const getDeals = () => axios.get(`${API_BASE_URL}/deals`);
 
-export const triggerOrderEmail = (userId: string) => axios.post(`https://notification-service-production-e192.up.railway.app/api/v1/notify`, { userId, orderId: "1", status: "PAID" });
+export const triggerOrderEmail = (userId: string) => axios.post(`${NOTIFICATION_URL}/api/v1/notify`, { userId, orderId: "1", status: "PAID" });
 
 export const getCatalogStatus = () => axios.get(`${CATALOG_URL}/health`);
