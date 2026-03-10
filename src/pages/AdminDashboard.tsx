@@ -182,7 +182,7 @@ const AdminDashboard: React.FC = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-              {headers.map(h => <th key={h} style={{ padding: '20px', textAlign: 'left', fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>{h.toUpperCase()}</th>)}
+              {headers.map(h => <th key={h} style={{ padding: '20px', textAlign: 'left', fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>{(h || '').toUpperCase()}</th>)}
             </tr>
           </thead>
           <tbody>

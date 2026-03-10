@@ -94,7 +94,7 @@ const MenuCatalog: React.FC = () => {
                         <div style={{ padding: '25px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                 <span style={{ fontSize: '0.65rem', background: 'rgba(251, 146, 60, 0.1)', color: 'var(--accent-gold)', padding: '5px 12px', borderRadius: '100px', fontWeight: 800, letterSpacing: '1px' }}>
-                                    {item.categoryName.toUpperCase()}
+                                    {(item.categoryName || 'General').toUpperCase()}
                                 </span>
                                 <div className="status-dot live" />
                             </div>

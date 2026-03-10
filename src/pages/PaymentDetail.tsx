@@ -175,7 +175,7 @@ const PaymentDetail: React.FC = () => {
               { label: 'Payment ID', value: payment._id || (payment as any).id || 'N/A' },
               { label: 'Order ID', value: payment.orderId },
               { label: 'User ID', value: payment.userId },
-              { label: 'Currency', value: payment.currency.toUpperCase() },
+              { label: 'Currency', value: (payment.currency || 'LKR').toUpperCase() },
               { label: 'Stripe Intent ID', value: payment.stripePaymentIntentId || '—' },
               { label: 'Payment Method ID', value: payment.stripePaymentMethodId || '—' },
               ...(payment.refundId ? [

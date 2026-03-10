@@ -220,7 +220,7 @@ const NavBar: React.FC = () => {
                                 color: '#000',
                                 boxShadow: location.pathname.startsWith('/profile') ? '0 0 15px rgba(251, 146, 60, 0.3)' : 'none'
                              }}>
-                                {user.username.charAt(0).toUpperCase()}
+                                {(user.username || 'U').charAt(0).toUpperCase()}
                             </div>
                         </Link>
 

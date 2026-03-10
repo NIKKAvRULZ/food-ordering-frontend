@@ -138,7 +138,7 @@ const Home: React.FC = () => {
           <div className="glass-panel fade-in" style={{ padding: '30px', borderTop: '4px solid var(--accent-gold)', animationDelay: '0.3s' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
               <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#000', fontWeight: 800, flexShrink: 0 }}>
-                {user.username.charAt(0).toUpperCase()}
+                {(user.username || 'U').charAt(0).toUpperCase()}
               </div>
               <div style={{ overflow: 'hidden' }}>
                 <h4 style={{ margin: 0, fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</h4>
@@ -188,7 +188,7 @@ const StatusItem = ({ label, status }: any) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <span style={{ fontSize: '0.8rem' }}>{label}</span>
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{status.toUpperCase()}</span>
+      <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{(status || 'pending').toUpperCase()}</span>
       <div className={`status-dot ${status}`} style={{ width: '8px', height: '8px' }}></div>
     </div>
   </div>
