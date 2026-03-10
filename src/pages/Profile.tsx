@@ -89,14 +89,65 @@ const Profile: React.FC = () => {
                     <h3 style={{ color: 'var(--accent-gold)', marginTop: 0, marginBottom: '15px', fontSize: '1rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px' }}>
                         🕰️ Recent Order History
                     </h3>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                        {orders ? (
-                            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#a78bfa' }}>
-                                {typeof orders === 'string' ? orders : JSON.stringify(orders, null, 2)}
-                            </pre>
-                        ) : (
-                            <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>No past orders found.</p>
-                        )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {(() => {
+                            let orderList = [];
+                            try {
+                                orderList = typeof orders === 'string' ? JSON.parse(orders) : orders;
+                                if (!Array.isArray(orderList)) {
+                                     orderList = orderList ? [orderList] : [];
+                                }
+                            } catch (e) {
+                                // Fallback if parsing fails but string is not empty
+                                if (orders && typeof orders === 'string') {
+                                    return <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>{orders}</p>;
+                                }
+                            }
+
+                            if (!orderList || orderList.length === 0) {
+                                return <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>No past orders found.</p>;
+                            }
+
+                            return orderList.map((order: any, idx: number) => (
+                                <div key={idx} style={{ 
+                                    padding: '15px', 
+                                    background: 'rgba(255,255,255,0.03)', 
+                                    border: '1px solid var(--glass-border)', 
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s ease'
+                                }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', letterSpacing: '1px', marginBottom: '5px', fontWeight: 600 }}>
+                                            ORDER #{order.orderId || order.id || 'UKNOWN'}
+                                        </div>
+                                        <div style={{ color: 'var(--text-main)', fontSize: '1rem' }}>
+                                            Amount: <span style={{ fontWeight: 'bold' }}>LKR {order.amount || order.totalAmount || '0.00'}</span>
+                                        </div>
+                                        {(order.createdAt || order.timestamp) && (
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '5px' }}>
+                                                {new Date(order.createdAt || order.timestamp).toLocaleString()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <span style={{ 
+                                            padding: '5px 12px', 
+                                            borderRadius: '20px', 
+                                            fontSize: '0.7rem', 
+                                            fontWeight: 'bold',
+                                            letterSpacing: '1px',
+                                            background: (order.status === 'COMPLETED' || order.status === 'PAID' || order.status === 'SUCCESS') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
+                                            color: (order.status === 'COMPLETED' || order.status === 'PAID' || order.status === 'SUCCESS') ? '#4ade80' : '#facc15'
+                                        }}>
+                                            {order.status || 'PENDING'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ));
+                        })()}
                     </div>
                 </div>
 
