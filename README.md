@@ -1,4 +1,6 @@
 # Gourmet Express | Frontend Microservice
+![repo-banner.png](docs/repo-banner.png)
+
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
@@ -6,6 +8,15 @@
 ![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
 
 **Gourmet Express** is a luxury food delivery platform built with a distributed microservice architecture. This repository contains the **Identity & Gateway Frontend**, designed with a high-end Glassmorphism UI to manage user authentication and monitor network health.
+
+---
+
+## 🌐 Live Deployment
+The frontend application is fully deployed and accessible in the cloud via **Render**.
+
+* **Live Application:** [Gourmet Express on Render](https://gourmet-express-frontend.onrender.com) *(Update with exact Render URL if different)*
+* **Hosting Platform:** Render Web Service
+* **Deployment Pipeline:** Automated pull-based CI/CD triggers on every push to the main branch.
 
 ---
 
