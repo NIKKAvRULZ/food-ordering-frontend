@@ -17,6 +17,7 @@ export const registerUser = (userData: any) => axios.post(`${API_BASE_URL}/regis
 export const loginUser = (credentials: any) => axios.post(`${API_BASE_URL}/login`, null, { params: credentials });
 export const getUserProfile = (id: number | string) => axios.get(`${API_BASE_URL}/${id}`);
 export const getOrderStatus = (id: number | string) => axios.get(`${API_BASE_URL}/${id}/order-status`);
+export const getUserOrders = (id: number | string) => axios.get(`${API_BASE_URL}/${id}/orders`);
 export const getDeals = () => axios.get(`${API_BASE_URL}/deals`);
 
 export const triggerOrderEmail = (userId: string) => axios.post(`${NOTIFICATION_URL}/api/v1/notify`, { userId, orderId: "1", status: "PAID" });
