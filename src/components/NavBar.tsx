@@ -1,96 +1,302 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const NavBar: React.FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+    const { user, logout, statuses } = useAuth();
+    const { cartItems, setCartOpen } = useCart();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [scrolled, setScrolled] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-  const isActive = (path: string) => location.pathname === path;
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
-  return (
-    <nav className="fade-in" style={{ 
-      position: 'fixed', 
-      top: '20px', 
-      left: '5%',
-      right: '5%',
-      margin: '0 auto',
-      maxWidth: '1200px',
-      height: '75px',
-      background: 'rgba(15, 23, 42, 0.4)',
-      backdropFilter: 'blur(15px)',
-      border: '1px solid var(--glass-border)',
-      borderRadius: '25px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '0 40px',
-      zIndex: 1000,
-      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
-    }}>
-      <div className="brand-text" style={{ 
-        fontSize: '1.4rem', 
-        fontWeight: 800, 
-        letterSpacing: '-1px',
-        background: 'linear-gradient(90deg, #fff, var(--accent-gold))',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-      }}>
-        GOURMET<span style={{ fontWeight: 300, opacity: 0.8 }}>.EXPRESS</span>
-      </div>
+    const isActive = (path: string) => location.pathname === path;
 
-      <div className="nav-links" style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
-        {user ? (
-          <>
-            <NavLink to="/home" active={isActive('/home')}>Home</NavLink>
-            <NavLink to="/menu" active={isActive('/menu')}>Explore</NavLink>
-            <NavLink to="/payments" active={isActive('/payments')}>Ledger</NavLink>
-            <NavLink to={`/profile/${user.id || 'me'}`} active={location.pathname.startsWith('/profile')}>Identity</NavLink>
-            <button onClick={handleLogout} style={{ 
-              background: 'rgba(239, 68, 68, 0.1)', 
-              border: '1px solid rgba(239, 68, 68, 0.2)', 
-              color: '#f87171',
-              padding: '10px 22px',
-              borderRadius: '100px',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              transition: '0.3s'
-            }}>Sign Out</button>
-          </>
-        ) : (
-          <>
-            <NavLink to="/" active={isActive('/')}>Network</NavLink>
-            <NavLink to="/admin/login" active={isActive('/admin/login')} gold>Admin Gateway</NavLink>
-            <NavLink to="/login" active={isActive('/login')}>Login</NavLink>
-            <Link to="/register" className="btn-gold" style={{ padding: '12px 28px', fontSize: '0.9rem' }}>Join System</Link>
-          </>
-        )}
-      </div>
-    </nav>
-  );
+    // Check if any critical service is down
+    const isSystemHealthy = statuses.identity === 'live' && statuses.orders === 'live';
+
+    return (
+        <nav style={{ 
+            position: 'fixed', 
+            top: scrolled ? '12px' : '28px', 
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: scrolled ? '94%' : '90%',
+            maxWidth: '1300px',
+            height: scrolled ? '68px' : '88px',
+            background: scrolled ? 'rgba(10, 15, 28, 0.85)' : 'rgba(15, 23, 42, 0.3)',
+            backdropFilter: 'blur(24px)',
+            border: scrolled ? '1px solid rgba(251, 146, 60, 0.4)' : '1px solid var(--glass-border)',
+            borderRadius: scrolled ? '24px' : '34px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 35px',
+            zIndex: 3000,
+            boxShadow: scrolled ? '0 25px 60px -15px rgba(0,0,0,0.6)' : '0 10px 30px rgba(0,0,0,0.1)',
+            transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}>
+            {/* 1. BRAND SECTION (LEFT) */}
+            <div 
+                onClick={() => navigate('/')} 
+                className="nav-brand"
+                style={{ 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    transition: 'transform 0.3s ease'
+                }}
+            >
+                <div style={{
+                    width: scrolled ? '34px' : '42px',
+                    height: scrolled ? '34px' : '42px',
+                    background: 'linear-gradient(135deg, var(--accent-gold), #ea580c)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: scrolled ? '1.1rem' : '1.3rem',
+                    fontWeight: 900,
+                    color: '#fff',
+                    transform: 'rotate(-8deg)',
+                    boxShadow: '0 8px 20px rgba(234, 88, 12, 0.3)',
+                    transition: 'all 0.5s ease'
+                }}>G</div>
+                <div style={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    lineHeight: 1
+                }}>
+                    <div style={{ 
+                        fontSize: scrolled ? '1rem' : '1.2rem', 
+                        fontWeight: 900, 
+                        letterSpacing: '1px',
+                        color: '#fff',
+                        textTransform: 'uppercase',
+                        transition: 'font-size 0.5s ease'
+                    }}>
+                        Gourmet
+                    </div>
+                    <div style={{ 
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: 'var(--accent-gold)',
+                        letterSpacing: '2.5px',
+                        textTransform: 'uppercase',
+                        marginTop: '2px',
+                        opacity: 0.8
+                    }}>Express</div>
+                </div>
+            </div>
+
+            {/* 2. NAVIGATION LINKS (CENTERED) */}
+            <div className="nav-links-center" style={{ 
+                display: 'flex', 
+                gap: '4px', 
+                alignItems: 'center',
+                background: 'rgba(255,255,255,0.02)',
+                padding: '6px',
+                borderRadius: '100px',
+                border: '1px solid rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(5px)'
+            }}>
+                {user ? (
+                    <>
+                        <NavLink to="/home" active={isActive('/home')}>Hub</NavLink>
+                        <NavLink to="/menu" active={isActive('/menu')}>Kitchen</NavLink>
+                        <NavLink to="/payments" active={isActive('/payments')}>Ledger</NavLink>
+                    </>
+                ) : (
+                    <>
+                        <NavLink to="/" active={isActive('/')}>Portal</NavLink>
+                        <NavLink to="/admin/login" active={isActive('/admin/login')} special>Terminal</NavLink>
+                    </>
+                )}
+            </div>
+
+            {/* 3. ACTION SECTION (RIGHT) */}
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px',
+                    padding: '8px 18px',
+                    background: 'rgba(0,0,0,0.2)',
+                    borderRadius: '100px',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                    {/* Status Pip */}
+                    <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: isSystemHealthy ? 'var(--success)' : '#ef4444',
+                        boxShadow: `0 0 10px ${isSystemHealthy ? 'var(--success)' : '#ef4444'}`,
+                        animation: 'blink 2s infinite'
+                    }} title={isSystemHealthy ? "Global Operations: LIVE" : "System Degraded"}></div>
+
+                    <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+
+                    {/* Cart Trigger */}
+                    <button 
+                        onClick={() => setCartOpen(true)}
+                        style={{ 
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'transform 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>🛒</span>
+                        {cartItems.length > 0 && (
+                            <div style={{ 
+                                position: 'absolute', 
+                                top: '-6px', 
+                                right: '-8px', 
+                                background: 'var(--accent-gold)', 
+                                color: '#000', 
+                                width: '16px', 
+                                height: '16px', 
+                                borderRadius: '50%', 
+                                fontSize: '0.6rem', 
+                                fontWeight: 900,
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                border: '2px solid #0f172a'
+                            }}>
+                                {cartItems.length}
+                            </div>
+                        )}
+                    </button>
+                </div>
+
+                {user ? (
+                    <>
+                        <Link 
+                            to={`/profile/${user.id || 'me'}`} 
+                            style={{ 
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '5px',
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: '100px',
+                                border: `1px solid ${location.pathname.startsWith('/profile') ? 'var(--accent-gold)' : 'transparent'}`,
+                                transition: '0.3s'
+                            }}
+                        >
+                            <div style={{ 
+                                width: '32px', 
+                                height: '32px', 
+                                borderRadius: '50%', 
+                                background: 'var(--accent-gold)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                fontSize: '0.8rem', 
+                                fontWeight: 900, 
+                                color: '#000',
+                                boxShadow: location.pathname.startsWith('/profile') ? '0 0 15px rgba(251, 146, 60, 0.3)' : 'none'
+                             }}>
+                                {user.username.charAt(0).toUpperCase()}
+                            </div>
+                        </Link>
+
+                        <button onClick={handleLogout} className="sign-out-trigger" title="Terminate Session">
+                            <span style={{ fontSize: '1.1rem' }}>⏻</span>
+                        </button>
+                    </>
+                ) : (
+                    <Link to="/login" className="btn-gold" style={{ padding: '10px 22px', fontSize: '0.8rem' }}>Access</Link>
+                )}
+            </div>
+
+            <style>{`
+                .nav-brand:hover { transform: scale(1.02); }
+                .sign-out-trigger {
+                    background: rgba(239, 68, 68, 0.1);
+                    border: 1px solid rgba(239, 68, 68, 0.25);
+                    color: #f87171;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    alignItems: center;
+                    justifyContent: center;
+                    transition: all 0.3s ease;
+                }
+                .sign-out-trigger:hover {
+                    background: #ef4444;
+                    color: #fff;
+                    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+                    transform: rotate(90deg);
+                }
+                @keyframes blink {
+                    0% { opacity: 1; }
+                    50% { opacity: 0.4; }
+                    100% { opacity: 1; }
+                }
+                @media (max-width: 900px) {
+                    nav { padding: 0 20px !important; }
+                    .nav-links-center { display: none !important; }
+                }
+            `}</style>
+        </nav>
+    );
 };
 
-const NavLink = ({ to, children, active, gold }: { to: string; children: React.ReactNode; active?: boolean, gold?: boolean }) => (
-  <Link to={to} style={{ 
-    color: gold ? 'var(--accent-gold)' : (active ? '#fff' : 'rgba(255,255,255,0.6)'), 
-    textDecoration: 'none', 
-    fontSize: '0.85rem',
-    fontWeight: active || gold ? 700 : 500,
-    letterSpacing: '0.5px',
-    transition: '0.3s',
-    borderBottom: active ? '2px solid var(--accent-gold)' : '2px solid transparent',
-    padding: '4px 0'
-  }}>
-    {children}
-  </Link>
+const NavLink = ({ to, children, active, special }: { to: string; children: React.ReactNode; active?: boolean, special?: boolean }) => (
+    <Link to={to} style={{ 
+        color: special ? 'var(--accent-gold)' : (active ? '#fff' : 'rgba(255,255,255,0.5)'), 
+        textDecoration: 'none', 
+        fontSize: '0.75rem',
+        fontWeight: 800,
+        textTransform: 'uppercase',
+        letterSpacing: '1.2px',
+        padding: '10px 22px',
+        borderRadius: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: active ? 'rgba(255,255,255,0.06)' : 'transparent',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        position: 'relative'
+    }}>
+        {children}
+        {active && (
+            <div style={{
+                position: 'absolute',
+                bottom: '6px',
+                width: '12px',
+                height: '2px',
+                borderRadius: '100px',
+                background: 'var(--accent-gold)',
+                boxShadow: '0 0 6px var(--accent-gold)'
+            }}></div>
+        )}
+    </Link>
 );
 
 export default NavBar;
+
 

@@ -92,17 +92,15 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
           Order Summary
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.9rem' }}>
-          <div><span style={{ color: 'var(--text-dim)' }}>Product</span></div>
-          <div style={{ textAlign: 'right', fontWeight: 600 }}>{orderInfo.product}</div>
-          <div><span style={{ color: 'var(--text-dim)' }}>Qty</span></div>
-          <div style={{ textAlign: 'right' }}>{orderInfo.quantity}</div>
-          <div><span style={{ color: 'var(--text-dim)' }}>Unit Price</span></div>
-          <div style={{ textAlign: 'right' }}>${(orderInfo.price || 0).toFixed(2)}</div>
+          <div><span style={{ color: 'var(--text-dim)' }}>Order Concept</span></div>
+          <div style={{ textAlign: 'right', fontWeight: 600 }}>{orderInfo.product ? 'Legacy Entity' : 'Consolidated Cart'}</div>
+          <div><span style={{ color: 'var(--text-dim)' }}>Reference</span></div>
+          <div style={{ textAlign: 'right' }}>{orderInfo.product || 'Multi-Item Specification'}</div>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Total</span>
+          <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Total Amount</span>
           <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-            ${((orderInfo.price || 0) * (orderInfo.quantity || 1)).toFixed(2)}
+            ${Number(orderInfo.price || (orderInfo as any).totalAmount || (orderInfo.price * orderInfo.quantity) || 0).toFixed(2)}
           </span>
         </div>
       </div>

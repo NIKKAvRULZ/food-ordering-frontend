@@ -136,7 +136,7 @@ const PaymentDetail: React.FC = () => {
         <div>
           <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '4px' }}>Total Amount</div>
           <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--accent-gold)', lineHeight: 1 }}>
-            ${(payment.amount || 0).toFixed(2)}
+            ${Number(payment.amount || 0).toFixed(2)}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>{payment.currency}</div>
         </div>
@@ -194,11 +194,11 @@ const PaymentDetail: React.FC = () => {
         {activeTab === 'order' && payment.orderDetails && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
             {[
-              { label: 'Order ID', value: payment.orderDetails.id },
-              { label: 'Product', value: payment.orderDetails.product },
-              { label: 'Quantity', value: payment.orderDetails.quantity.toString() },
-              { label: 'Unit Price', value: `$${(payment.orderDetails.price || 0).toFixed(2)}` },
-              { label: 'Order Status', value: payment.orderDetails.status },
+              { label: 'Order ID', value: payment.orderDetails.id || (payment.orderDetails as any)._id },
+              { label: 'Structure', value: payment.orderDetails.product ? 'Legacy Product' : 'Modern Multi-Item' },
+              { label: 'Item Summary', value: payment.orderDetails.product || ((payment.orderDetails as any).items?.length ? `${(payment.orderDetails as any).items.length} items` : 'N/A') },
+              { label: 'Total Value', value: `$${Number(payment.orderDetails.price || (payment.orderDetails as any).totalAmount || 0).toFixed(2)}` },
+              { label: 'Order Status', value: (payment.orderDetails.status || 'N/A').toUpperCase() },
               { label: 'Customer ID', value: payment.orderDetails.userId },
             ].map(({ label, value }) => (
               <div key={label} style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '16px' }}>
