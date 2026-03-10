@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const monitorServices = async () => {
       // 1. Identity Node (Primary)
       try {
-        const res = await axios.get(`${import.meta.env.VITE_IDENTITY_URL}/ping`, { timeout: 8000 });
+        const res = await axios.get(`${import.meta.env.VITE_IDENTITY_URL}/api/users/ping`, { timeout: 8000 });
         if (res.status === 200 || res.status === 404) {
           setStatuses(prev => ({ ...prev, identity: 'live' }));
         }
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const url = import.meta.env.VITE_CATALOG_URL;
         if (url) {
-          const res = await axios.get(url, { timeout: 8000 });
+          const res = await axios.get(`${url}/health`, { timeout: 8000 });
           setStatuses(prev => ({ ...prev, catalog: res.status === 200 || res.status === 404 ? 'live' : 'down' }));
         }
       } catch (error: any) {
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const url = import.meta.env.VITE_PAYMENT_URL;
         if (url) {
-          const res = await axios.get(url, { timeout: 8000 });
+          const res = await axios.get(`${url}/health`, { timeout: 8000 });
           setStatuses(prev => ({ ...prev, payment: res.status === 200 || res.status === 404 ? 'live' : 'down' }));
         }
       } catch (error: any) {
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const url = import.meta.env.VITE_ORDER_URL;
         if (url) {
-          const res = await axios.get(url, { timeout: 8000 });
+          const res = await axios.get(`${url}/orders`, { timeout: 8000 });
           setStatuses(prev => ({ ...prev, orders: res.status === 200 || res.status === 404 ? 'live' : 'down' }));
         }
       } catch (error: any) {
