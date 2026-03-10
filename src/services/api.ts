@@ -1,11 +1,24 @@
 import axios from 'axios';
 
 // Vite requires the 'VITE_' prefix to expose variables to your code
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_IDENTITY_URL;
 const CATALOG_URL = import.meta.env.VITE_CATALOG_URL;
 
+// Intercept requests to add JWT Token Auth Header
+axios.interceptors.request.use((config) => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 export const registerUser = (userData: any) => axios.post(`${API_BASE_URL}/register`, userData);
-export const loginUser = (credentials: any) => axios.post(`${API_BASE_URL}/login`, credentials);
-export const getUserProfile = (id: number) => axios.get(`${API_BASE_URL}/${id}`);
+export const loginUser = (credentials: any) => axios.post(`${API_BASE_URL}/login`, null, { params: credentials });
+export const getUserProfile = (id: number | string) => axios.get(`${API_BASE_URL}/${id}`);
+export const getOrderStatus = (id: number | string) => axios.get(`${API_BASE_URL}/${id}/order-status`);
+export const getDeals = () => axios.get(`${API_BASE_URL}/deals`);
+
+export const triggerOrderEmail = (userId: string) => axios.post(`https://notification-service-production-e192.up.railway.app/api/v1/notify`, { userId, orderId: "1", status: "PAID" });
 
 export const getCatalogStatus = () => axios.get(CATALOG_URL);

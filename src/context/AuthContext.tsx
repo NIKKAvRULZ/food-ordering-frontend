@@ -4,8 +4,16 @@ import axios from 'axios';
 const AuthContext = createContext<any>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(JSON.parse(localStorage.getItem('user') || 'null'));
-  
+  const getInitialUser = () => {
+    try {
+      const item = localStorage.getItem('user');
+      return item && item !== 'undefined' ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const [user, setUser] = useState<any>(getInitialUser());
   // Updated to include all 4 required components [cite: 7]
   const [statuses, setStatuses] = useState({ 
     identity: 'pending', 
@@ -18,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const monitorServices = async () => {
       // 1. Identity Node (Primary)
       try {
-        const res = await axios.get(`${import.meta.env.VITE_IDENTITY_URL}/1`, { timeout: 8000 });
+        const res = await axios.get(`${import.meta.env.VITE_IDENTITY_URL}/ping`, { timeout: 8000 });
         if (res.status === 200 || res.status === 404) {
           setStatuses(prev => ({ ...prev, identity: 'live' }));
         }
@@ -72,6 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('jwt_token');
     setUser(null);
   };
 

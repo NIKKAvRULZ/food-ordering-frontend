@@ -16,8 +16,13 @@ const Login: React.FC = () => {
         setError('');
         try {
             const response = await loginUser(credentials); 
-            login(response.data); // Save user to global context
-            navigate(`/profile/${response.data.id}`); 
+            const { user, token } = response.data;
+            
+            // Save the JWT token to local storage for Axios to use
+            localStorage.setItem("jwt_token", token);
+            
+            login(user); // Save user to global context
+            navigate(`/home`); // Redirect automatically to the home dashboard as requested!
         } catch (err: any) {
             setError(err.response?.data || "Invalid credentials. Please try again.");
         } finally {

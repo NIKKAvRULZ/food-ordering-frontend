@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
@@ -7,12 +7,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
 
   if (!user) {
-    return (
-      <div style={{ textAlign: 'center', marginTop: '100px' }}>
-        <p style={{ color: 'var(--text-dim)' }}>Session expired. Please re-authenticate.</p>
-        <Link to="/login" className="btn-gold">Go to Login</Link>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUserProfile } from '../services/api';
+import { getUserProfile, getOrderStatus } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '../types/user';
 
@@ -9,13 +9,18 @@ const Profile: React.FC = () => {
     const { logout } = useAuth(); // Access logout from context
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
+    const [orders, setOrders] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await getUserProfile(Number(id));
-                setUser(response.data);
+                const [profileRes, ordersRes] = await Promise.all([
+                    getUserProfile(id || ""),
+                    getOrderStatus(id || "")
+                ]);
+                setUser(profileRes.data);
+                setOrders(ordersRes.data);
             } catch (err) {
                 console.error("Profile fetch failed", err);
             } finally {
@@ -76,6 +81,22 @@ const Profile: React.FC = () => {
                     <div style={{ gridColumn: 'span 2' }}>
                         <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Primary Delivery Address</label>
                         <p style={{ fontSize: '1.1rem', margin: '5px 0', color: 'var(--text-main)' }}>{user.deliveryAddress || 'No address provided'}</p>
+                    </div>
+                </div>
+
+                {/* Order History Section */}
+                <div style={{ marginTop: '20px', marginBottom: '40px', padding: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px' }}>
+                    <h3 style={{ color: 'var(--accent-gold)', marginTop: 0, marginBottom: '15px', fontSize: '1rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px' }}>
+                        🕰️ Recent Order History
+                    </h3>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
+                        {orders ? (
+                            <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: '#a78bfa' }}>
+                                {typeof orders === 'string' ? orders : JSON.stringify(orders, null, 2)}
+                            </pre>
+                        ) : (
+                            <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>No past orders found.</p>
+                        )}
                     </div>
                 </div>
 
