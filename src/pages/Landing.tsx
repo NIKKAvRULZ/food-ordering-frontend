@@ -56,10 +56,10 @@ const Landing: React.FC = () => {
 
         {/* Floating Decorative Items */}
         <div className="animate-float" style={{ position: 'absolute', top: '15%', right: '15%', width: '300px', height: '300px', zIndex: 1, opacity: 0.8 }}>
-           <img src="../images/gourmet_burger_hero_1773147069426.png" alt="Burger" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))' }} />
+           <img src="https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png" alt="Burger" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))' }} />
         </div>
         <div className="animate-float delay-2" style={{ position: 'absolute', bottom: '15%', right: '25%', width: '220px', height: '220px', zIndex: 1, opacity: 0.7 }}>
-           <img src="../images/premium_sushi_set_1773147115835.png" alt="Sushi" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }} />
+           <img src="https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png" alt="Sushi" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }} />
         </div>
 
         <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
@@ -96,10 +96,10 @@ const Landing: React.FC = () => {
       <section style={{ padding: '80px 8%', background: '#0a101f' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
           {[
-            { tag: 'BURGER', img: '../images/gourmet_burger_hero_1773147069426.png', label: 'Artisan Buns' },
-            { tag: 'SUSHI', img: '../images/premium_sushi_set_1773147115835.png', label: 'Edo-Style' },
-            { tag: 'STEAK', img: '../images/prime_steak_hero_1773147661998.png', label: 'Prime Cuts' },
-            { tag: 'VEGAN', img: '../images/pure_plant_vegan_bowl_1773147689203.png', label: 'Pure Plant' },
+            { tag: 'BURGER', img: 'https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png', label: 'Artisan Buns' },
+            { tag: 'SUSHI', img: 'https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png', label: 'Edo-Style' },
+            { tag: 'STEAK', img: 'https://i.postimg.cc/5yBwfWfX/prime_steak_hero_1773147661998.png', label: 'Prime Cuts' },
+            { tag: 'VEGAN', img: 'https://i.postimg.cc/yxmF7C7J/pure_plant_vegan_bowl_1773147689203.png', label: 'Pure Plant' },
           ].map((cat, i) => (
             <div key={i} className="glass-panel" style={{ 
               width: '240px', padding: '20px', textAlign: 'center', 
