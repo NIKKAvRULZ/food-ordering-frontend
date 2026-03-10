@@ -1,4 +1,4 @@
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
 export type PaymentCurrency = 'usd' | 'eur' | 'gbp' | 'lkr';
 
 export interface Payment {

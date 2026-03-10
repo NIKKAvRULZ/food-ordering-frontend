@@ -5,10 +5,11 @@ import { getPaymentsByUser } from '../services/paymentApi';
 import type { Payment, PaymentStatus } from '../types/payment';
 
 const STATUS_COLOR: Record<PaymentStatus, { bg: string; color: string; label: string }> = {
-  completed: { bg: 'rgba(16,185,129,0.15)', color: '#10b981', label: 'COMPLETED' },
-  pending:   { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24', label: 'PENDING' },
-  failed:    { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444', label: 'FAILED' },
-  refunded:  { bg: 'rgba(148,163,184,0.15)', color: '#94a3b8', label: 'REFUNDED' },
+  completed:  { bg: 'rgba(16,185,129,0.15)', color: '#10b981', label: 'COMPLETED' },
+  pending:    { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24', label: 'PENDING' },
+  processing: { bg: 'rgba(59,130,246,0.15)',  color: '#3b82f6', label: 'PROCESSING' },
+  failed:     { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444', label: 'FAILED' },
+  refunded:   { bg: 'rgba(148,163,184,0.15)', color: '#94a3b8', label: 'REFUNDED' },
 };
 
 const StatusBadge: React.FC<{ status: PaymentStatus }> = ({ status }) => {
@@ -43,8 +44,11 @@ const UserPayments: React.FC = () => {
       setError('');
       try {
         const res = await getPaymentsByUser(user.id?.toString() || '');
+        const list: Payment[] = Array.isArray(res.data)
+          ? res.data
+          : (res.data as any)?.data?.payments ?? [];
         setPayments(
-          [...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         );
       } catch {
         setError('Unable to retrieve payment history. Please try again later.');
