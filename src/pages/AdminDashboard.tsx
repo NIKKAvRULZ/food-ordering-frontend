@@ -90,7 +90,8 @@ const AdminDashboard: React.FC = () => {
       setEditForm(null);
       fetchData();
     } catch (err) {
-      alert('Failed to save catalog changes.');
+      console.error('Save failed:', err);
+      alert('Failed to save catalog changes. Check console for vector errors.');
     }
   };
 
@@ -102,7 +103,23 @@ const AdminDashboard: React.FC = () => {
         return (
           <div className="fade-in">
             <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-              <button onClick={() => setEditForm({ name: '', description: '', price: 0, categoryName: '', imageUrl: '' })} className="btn-gold" style={{ background: 'var(--success)' }}>+ New Food Item</button>
+              <button 
+                onClick={() => setEditForm({ 
+                  name: '', 
+                  description: '', 
+                  price: 0, 
+                  categoryName: 'General', 
+                  imageUrl: '',
+                  isAvailable: 1,
+                  restaurantId: 1,
+                  restaurantName: 'Gourmet Express',
+                  categoryId: 1 
+                })} 
+                className="btn-gold" 
+                style={{ background: 'var(--success)' }}
+              >
+                + New Food Item
+              </button>
             </div>
             {renderTable(['UUID', 'Structure', 'Category', 'Price', 'Actions'], data.map(item => [
               String(item.id).substring(0, 8),
