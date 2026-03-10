@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { getMenuItems } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
   const { user, statuses, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && statuses.catalog === 'live') {
+      getMenuItems()
+        .then(res => {
+          if (res.data && res.data.success && Array.isArray(res.data.data)) {
+            setMenuItems(res.data.data.slice(0, 4)); // Get first 4 items
+          }
+        })
+        .catch(err => console.error("Failed to fetch menu items", err));
+    }
+  }, [user, statuses.catalog]);
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -48,14 +63,40 @@ const Home: React.FC = () => {
               marginTop: 0, 
               fontWeight: 400 
             }}>
-              {statuses.catalog === 'live' ? '🎁 Exclusive Deals for You' : '⚠️ Integration Offline'}
+              {statuses.catalog === 'live' ? '🎁 Today\'s Special Menu' : '⚠️ Integration Offline'}
             </h3>
 
-            <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '15px' }}>
-              {statuses.catalog === 'live' 
-                ? `"${user.recommendedDeals || "No deals available at this moment."}"`
-                : "The Identity Service cannot reach the Catalog Node to fetch your personalized deals."}
-            </p>
+            {statuses.catalog === 'live' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                {menuItems.length > 0 ? menuItems.map((item, idx) => (
+                  <div key={idx} style={{ 
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid var(--glass-border)', 
+                    borderRadius: '8px', 
+                    padding: '15px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}>
+                    {item.imageUrl && (
+                       <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px' }} />
+                    )}
+                    <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>{item.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', flexGrow: 1 }}>{item.description}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>LKR {(item.price || 0).toFixed(2)}</span>
+                      <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{item.categoryName}</span>
+                    </div>
+                  </div>
+                )) : (
+                  <p style={{ fontStyle: 'italic', color: 'var(--text-dim)' }}>Loading specials...</p>
+                )}
+              </div>
+            ) : (
+              <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '15px' }}>
+                The Identity Service cannot reach the Catalog Node to fetch your personalized deals.
+              </p>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span className="badge" style={{ 

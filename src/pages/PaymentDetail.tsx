@@ -6,6 +6,7 @@ import type { PaymentWithDetails, PaymentStatus } from '../types/payment';
 
 const STATUS_COLOR: Record<PaymentStatus, { bg: string; color: string; label: string }> = {
   completed: { bg: 'rgba(16,185,129,0.15)',  color: '#10b981', label: 'COMPLETED' },
+  processing:{ bg: 'rgba(56,189,248,0.15)',  color: '#38bdf8', label: 'PROCESSING' },
   pending:   { bg: 'rgba(251,191,36,0.15)',   color: '#fbbf24', label: 'PENDING' },
   failed:    { bg: 'rgba(239,68,68,0.15)',    color: '#ef4444', label: 'FAILED' },
   refunded:  { bg: 'rgba(148,163,184,0.15)',  color: '#94a3b8', label: 'REFUNDED' },
