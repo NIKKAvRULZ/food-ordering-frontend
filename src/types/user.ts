@@ -4,5 +4,6 @@ export interface User {
     email: string;
     password?: string;
     deliveryAddress: string;
-    recommendation: string;
+    recommendation?: string;
+    vegan?: boolean;
 }

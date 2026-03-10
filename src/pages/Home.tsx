@@ -14,7 +14,17 @@ const Home: React.FC = () => {
       getMenuItems()
         .then(res => {
           if (res.data && res.data.success && Array.isArray(res.data.data)) {
-            setMenuItems(res.data.data.slice(0, 4)); // Get first 4 items
+            let processedItems: any[] = res.data.data;
+            
+            if (user?.vegan) {
+               processedItems = processedItems.filter((i: any) => 
+                 (i.categoryName && i.categoryName.toLowerCase().includes('veg')) || 
+                 (i.description && i.description.toLowerCase().includes('veg')) ||
+                 (i.name && i.name.toLowerCase().includes('veg'))
+               );
+            }
+            
+            setMenuItems(processedItems.slice(0, 4)); // Get first 4 items based on filter
           }
         })
         .catch(err => console.error("Failed to fetch menu items", err));
@@ -63,21 +73,13 @@ const Home: React.FC = () => {
               marginTop: 0, 
               fontWeight: 400 
             }}>
-              {statuses.catalog === 'live' ? '🎁 Today\'s Special Menu' : '⚠️ Integration Offline'}
+              {statuses.catalog === 'live' ? (user?.vegan ? '🌱 Your Vegan Recommendations' : '🎁 Today\'s Special Menu') : '⚠️ Integration Offline'}
             </h3>
 
             {statuses.catalog === 'live' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '20px' }}>
                 {menuItems.length > 0 ? menuItems.map((item, idx) => (
-                  <div key={idx} style={{ 
-                    background: 'rgba(255,255,255,0.02)', 
-                    border: '1px solid var(--glass-border)', 
-                    borderRadius: '8px', 
-                    padding: '15px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px'
-                  }}>
+                  <div key={idx} className="food-card fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
                     {item.imageUrl && (
                        <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px' }} />
                     )}
@@ -85,7 +87,9 @@ const Home: React.FC = () => {
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', flexGrow: 1 }}>{item.description}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
                       <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>LKR {(item.price || 0).toFixed(2)}</span>
-                      <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>{item.categoryName}</span>
+                      <span style={{ fontSize: '0.65rem', background: user?.vegan ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255,255,255,0.1)', color: user?.vegan ? '#4ade80' : 'var(--text-main)', padding: '2px 6px', borderRadius: '4px' }}>
+                        {item.categoryName}
+                      </span>
                     </div>
                   </div>
                 )) : (
@@ -133,6 +137,12 @@ const Home: React.FC = () => {
             <div>
               <label style={{ display: 'block', fontSize: '0.65rem', opacity: 0.5 }}>DELIVERY ADDRESS</label>
               <span>{user.deliveryAddress || 'Not set'}</span>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', opacity: 0.5 }}>DIETARY PREFERENCE</label>
+              <span style={{ color: user.vegan ? '#4ade80' : 'var(--text-main)', fontWeight: user.vegan ? 600 : 400 }}>
+                {user.vegan ? '🌱 Vegan' : '🥩 Standard'}
+              </span>
             </div>
           </div>
           

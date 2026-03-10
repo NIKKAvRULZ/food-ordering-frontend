@@ -1,8 +1,9 @@
 :root {
-  --bg-deep: #05070a;
-  --accent-gold: #d4af37;
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --bg-deep: #0f172a;
+  --accent-gold: #f97316; /* Appetizing warm orange */
+  --accent-secondary: #facc15;
+  --glass: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --text-main: #f8fafc;
   --text-dim: #94a3b8;
   --success: #10b981;
@@ -10,9 +11,11 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   background-color: var(--bg-deep);
-  background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg-deep));
+  background-image: radial-gradient(circle at 15% 50%, rgba(249, 115, 22, 0.15), transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(250, 204, 21, 0.1), transparent 25%);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
 }
@@ -20,49 +23,54 @@ body {
 /* Glassmorphism Panels */
 .glass-panel {
   background: var(--glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border: 1px solid var(--glass-border);
   border-radius: 28px;
   padding: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Nav & Branding */
 .navbar {
   display: flex;
   justify-content: space-between;
-  padding: 25px 8%;
-  background: rgba(5, 7, 10, 0.8);
-  backdrop-filter: blur(10px);
+  padding: 20px 8%;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
   z-index: 1000;
 }
 
 .brand-text {
-  font-size: 1.2rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--accent-gold);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
   font-weight: 800;
 }
 
 /* Buttons */
 .btn-gold {
-  background: var(--accent-gold);
-  color: #000;
+  background: linear-gradient(135deg, var(--accent-gold), #ea580c);
+  color: #fff;
   padding: 12px 30px;
   border-radius: 100px;
-  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
 }
 
 .btn-gold:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.5);
 }
 
 /* Status Indicators */
@@ -93,13 +101,50 @@ input:focus {
   border-color: var(--accent-gold);
 }
 
-/* Update these in your existing App.css */
-.status-dot.live { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
-.status-dot.pending { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; animation: pulse 2s infinite; }
-.status-dot.down { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+/* Record Card elements and animation keys */
+.food-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+.food-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(249, 115, 22, 0.4);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.food-card img {
+  border-radius: 12px;
+  transition: transform 0.5s ease;
+}
+.food-card:hover img {
+  transform: scale(1.05);
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Outfit', sans-serif;
+}
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

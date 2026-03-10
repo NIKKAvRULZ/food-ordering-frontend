@@ -10,6 +10,9 @@ import PaymentCheckout from './pages/PaymentCheckout';
 import UserPayments from './pages/UserPayments';
 import PaymentDetail from './pages/PaymentDetail';
 import PaymentInvoice from './pages/PaymentInvoice';
+import MenuCatalog from './pages/MenuCatalog';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import NavBar from './components/NavBar';
 import './App.css';
 
@@ -26,6 +29,7 @@ const App: React.FC = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path="/home" element={<Home />} /> 
+              <Route path="/menu" element={<MenuCatalog />} />
               <Route path="/profile/:id" element={<Profile />} />
               {/* Payment Service — Susara */}
               <Route path="/payments/checkout" element={<PaymentCheckout />} />
@@ -33,6 +37,9 @@ const App: React.FC = () => {
               <Route path="/payments" element={<UserPayments />} />
               <Route path="/payments/:id" element={<PaymentDetail />} />
               <Route path="/payments/:id/invoice" element={<PaymentInvoice />} />
+              {/* Admin Domain */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>
           </main>
         </div>

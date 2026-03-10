@@ -26,6 +26,7 @@ const NavBar: React.FC = () => {
         ) : (
           <>
             <Link to="/" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Network</Link>
+            <Link to="/admin/login" style={{ color: '#eab308', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>Admin Gateway</Link>
             <Link to="/login" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Login</Link>
             <Link to="/register" className="btn-gold" style={{ padding: '8px 20px' }}>Join</Link>
           </>

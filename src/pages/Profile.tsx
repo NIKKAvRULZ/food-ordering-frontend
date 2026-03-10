@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUserProfile, getOrderStatus, getUserOrders } from '../services/api';
+import { getUserProfile, getOrderStatus, getUserOrders, updateUserProfile } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '../types/user';
 
@@ -12,6 +12,10 @@ const Profile: React.FC = () => {
     const [orders, setOrders] = useState<any>(null); // Payments
     const [actualOrders, setActualOrders] = useState<any>(null); // Real Orders
     const [loading, setLoading] = useState(true);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState<Partial<User>>({});
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -36,6 +40,28 @@ const Profile: React.FC = () => {
     const handleLogout = () => {
         logout();
         navigate('/');
+    };
+
+    const handleEditToggle = () => {
+        if (!isEditing && user) {
+            setEditForm(user);
+        }
+        setIsEditing(!isEditing);
+    };
+
+    const handleSaveProfile = async () => {
+        if (!user || (!user.id && user.id !== 0)) return;
+        setIsSaving(true);
+        try {
+            const res = await updateUserProfile(user.id, editForm);
+            setUser(res.data);
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Failed to update profile", err);
+            alert("Failed to update profile. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (loading) {
@@ -67,25 +93,66 @@ const Profile: React.FC = () => {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', display: 'block' }}>NODE ID</span>
-                        <span style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>#00{user.id}</span>
+                        <span style={{ fontWeight: 700, color: 'var(--accent-gold)', marginBottom: '10px', display: 'block' }}>#00{user.id}</span>
+                        {!isEditing ? (
+                            <button onClick={handleEditToggle} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid var(--glass-border)', color: '#fff', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>
+                                ✎ Edit Profile
+                            </button>
+                        ) : (
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                <button onClick={handleEditToggle} style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>
+                                    Cancel
+                                </button>
+                                <button onClick={handleSaveProfile} disabled={isSaving} style={{ background: 'var(--accent-gold)', border: 'none', color: '#000', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>
+                                    {isSaving ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Profile Details Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '40px' }}>
-                    <div>
-                        <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Username</label>
-                        <p style={{ fontSize: '1.1rem', margin: '5px 0' }}>{user.username}</p>
+                {isEditing ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+                        <div>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px', display: 'block', marginBottom: '5px' }}>Username</label>
+                            <input type="text" value={editForm.username || ''} onChange={(e) => setEditForm({...editForm, username: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', color: '#fff' }} />
+                        </div>
+                        <div>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px', display: 'block', marginBottom: '5px' }}>Email Address</label>
+                            <input type="email" value={editForm.email || ''} onChange={(e) => setEditForm({...editForm, email: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', color: '#fff' }} />
+                        </div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px', display: 'block', marginBottom: '5px' }}>Primary Delivery Address</label>
+                            <input type="text" value={editForm.deliveryAddress || ''} onChange={(e) => setEditForm({...editForm, deliveryAddress: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', color: '#fff' }} />
+                        </div>
+                        <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <input type="checkbox" id="edit-vegan" checked={editForm.vegan || false} onChange={(e) => setEditForm({...editForm, vegan: e.target.checked})} style={{ accentColor: 'var(--accent-gold)', width: '18px', height: '18px' }} />
+                            <label htmlFor="edit-vegan" style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>I prefer <span style={{ color: '#4ade80', fontWeight: 600 }}>Vegan</span> meals 🥗</label>
+                        </div>
                     </div>
-                    <div>
-                        <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Email Address</label>
-                        <p style={{ fontSize: '1.1rem', margin: '5px 0' }}>{user.email}</p>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '40px' }}>
+                        <div>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Username</label>
+                            <p style={{ fontSize: '1.1rem', margin: '5px 0' }}>{user.username}</p>
+                        </div>
+                        <div>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Email Address</label>
+                            <p style={{ fontSize: '1.1rem', margin: '5px 0' }}>{user.email}</p>
+                        </div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Primary Delivery Address</label>
+                            <p style={{ fontSize: '1.1rem', margin: '5px 0', color: 'var(--text-main)' }}>{user.deliveryAddress || 'No address provided'}</p>
+                        </div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Dietary Profile</label>
+                            <p style={{ fontSize: '1.1rem', margin: '5px 0', color: user.vegan ? '#4ade80' : 'var(--text-main)' }}>
+                                {user.vegan ? '🌱 Vegan Preferences Active' : '🥩 Standard Eater'}
+                            </p>
+                        </div>
                     </div>
-                    <div style={{ gridColumn: 'span 2' }}>
-                        <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '1px' }}>Primary Delivery Address</label>
-                        <p style={{ fontSize: '1.1rem', margin: '5px 0', color: 'var(--text-main)' }}>{user.deliveryAddress || 'No address provided'}</p>
-                    </div>
-                </div>
+                )}
 
                 {/* Payment History Section */}
                 <div style={{ marginTop: '20px', marginBottom: '40px', padding: '20px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px' }}>

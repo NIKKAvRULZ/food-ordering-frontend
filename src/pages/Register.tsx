@@ -9,7 +9,8 @@ const Register: React.FC = () => {
         email: '',
         password: '',
         deliveryAddress: '',
-        recommendation: '' // This field is required by the backend, so we initialize it as an empty string
+        recommendation: '', // This field is required by the backend, so we initialize it as an empty string
+        vegan: false
     });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -113,6 +114,20 @@ const Register: React.FC = () => {
                             required 
                             style={{ width: '100%', boxSizing: 'border-box' }}
                         />
+                    </div>
+
+                    {/* Row 4: Preferences */}
+                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <input 
+                            type="checkbox" 
+                            id="vegan-checkbox"
+                            checked={formData.vegan}
+                            onChange={(e) => setFormData({...formData, vegan: e.target.checked})}
+                            style={{ accentColor: 'var(--accent-gold)' }}
+                        />
+                        <label htmlFor="vegan-checkbox" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                            I prefer <span style={{ color: '#4ade80', fontWeight: 600 }}>Vegan</span> meals 🥗
+                        </label>
                     </div>
 
                     <button 
