@@ -42,6 +42,6 @@ export const refundPayment = (id: string | number) => axios.post(`${PAYMENT_URL}
 
 // Admin User Management
 // Base URL for users list needs to be slightly different if IDENTITY_URL/api/users is the base
-export const getAllUsers = () => axios.get(`${import.meta.env.VITE_IDENTITY_URL}/api/users/ping`).then(() => axios.get(`${import.meta.env.VITE_IDENTITY_URL}/api/users`));
+export const getAllUsers = () => axios.get(`${API_BASE_URL}`);
 // Actually I'll use a more direct approach
 export const deleteUser = (id: string | number) => axios.delete(`${API_BASE_URL}/${id}`);
