@@ -19,6 +19,7 @@ const NavBar: React.FC = () => {
           <>
             <Link to="/home" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Home</Link>
             <Link to="/menu" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Food Items</Link>
+            <Link to="/payments" style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Payments</Link>
             <Link to={`/profile/${user.id || 'me'}`} style={{ color: 'inherit', textDecoration: 'none', fontSize: '0.9rem' }}>Profile</Link>
             <button onClick={handleLogout} className="btn-gold" style={{ padding: '8px 20px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>Sign Out</button>
           </>
