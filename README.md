@@ -61,9 +61,39 @@ src/
 ---
 ## 🌐 Microservice Architecture
 This frontend serves as the central orchestrator for the following nodes:
-* **Identity Node:*** (Live) Handles Secure Auth & Profile Management.
+* **Identity Node:** (Live) Handles Secure Auth & Profile Management.
+* **Notification Node:** (Live) Handles email notifications for user registration and orders.
 * **Catalog Node:** (Pending) Product management and menu integration.
 * **Order Node:** (Pending) Transactional service and order tracking.
 
---- 
+---
+
+## 📚 API Endpoints & Swagger Links
+Detailed interactive documentation for the REST APIs can be found on our live Swagger UIs:
+
+### 👤 User Identity Service (Live)
+**Swagger UI:** [https://user-identity-service.onrender.com/swagger-ui.html](https://user-identity-service.onrender.com/swagger-ui.html)  
+**Base URL:** `https://user-identity-service.onrender.com/api/users`
+
+* `POST /register` - Register a new user
+* `POST /login` - Authenticate a user and get a JWT token
+* `GET /{id}` - Get user details by ID
+* `GET /` - Get all users (Admin)
+* `PUT /{id}` - Update user profile
+* `DELETE /{id}` - Delete user
+* `GET /{id}/order-status` - Get recent order status
+* `GET /{id}/orders` - Get filtered orders for a user
+* `GET /deals` - Get daily catalog deals
+* `GET /ping` - Health check endpoint
+
+### ✉️ Notification Service (Live)
+**Swagger UI:** [https://notification-service-production-e192.up.railway.app/swagger-ui.html](https://notification-service-production-e192.up.railway.app/swagger-ui.html)  
+**Base URL:** `https://notification-service-production-e192.up.railway.app/api/v1/notify`
+
+* `POST /` - Send payment integration email
+* `GET /welcome/{userId}` - Send user welcome email
+* `GET /order-pending/{userId}/{orderId}` - Send pending payment reminder
+* `GET /ping` - Health check endpoint
+
+---
 Developed with ❤️ by **NIKKA**
