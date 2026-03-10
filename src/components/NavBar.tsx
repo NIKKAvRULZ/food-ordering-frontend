@@ -108,11 +108,11 @@ const NavBar: React.FC = () => {
                 display: 'flex', 
                 gap: '4px', 
                 alignItems: 'center',
-                background: 'rgba(255,255,255,0.02)',
-                padding: '6px',
+                background: user ? 'rgba(255,255,255,0.02)' : 'transparent',
+                padding: user ? '6px' : '0',
                 borderRadius: '100px',
-                border: '1px solid rgba(255,255,255,0.05)',
-                backdropFilter: 'blur(5px)'
+                border: user ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                backdropFilter: user ? 'blur(5px)' : 'none'
             }}>
                 {user ? (
                     <>
@@ -122,8 +122,7 @@ const NavBar: React.FC = () => {
                     </>
                 ) : (
                     <>
-                        <NavLink to="/" active={isActive('/')}>Portal</NavLink>
-                        <NavLink to="/admin/login" active={isActive('/admin/login')} special>Terminal</NavLink>
+                        {/* <NavLink to="/" active={isActive('/')}>Portal</NavLink> */}
                     </>
                 )}
             </div>
@@ -151,41 +150,45 @@ const NavBar: React.FC = () => {
 
                     <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
 
-                    {/* Cart Trigger */}
-                    <button 
-                        onClick={() => setCartOpen(true)}
-                        style={{ 
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            transition: 'transform 0.2s'
-                        }}
-                    >
-                        <span style={{ fontSize: '1.2rem' }}>🛒</span>
-                        {cartItems.length > 0 && (
-                            <div style={{ 
-                                position: 'absolute', 
-                                top: '-6px', 
-                                right: '-8px', 
-                                background: 'var(--accent-gold)', 
-                                color: '#000', 
-                                width: '16px', 
-                                height: '16px', 
-                                borderRadius: '50%', 
-                                fontSize: '0.6rem', 
-                                fontWeight: 900,
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center',
-                                border: '2px solid #0f172a'
-                            }}>
-                                {cartItems.length}
-                            </div>
-                        )}
-                    </button>
+                    {/* Cart Trigger - ONLY SHOW IF USER LOGGED IN */}
+                    {user ? (
+                        <button 
+                            onClick={() => setCartOpen(true)}
+                            style={{ 
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'transform 0.2s'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.2rem' }}>🛒</span>
+                            {cartItems.length > 0 && (
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    top: '-6px', 
+                                    right: '-8px', 
+                                    background: 'var(--accent-gold)', 
+                                    color: '#000', 
+                                    width: '16px', 
+                                    height: '16px', 
+                                    borderRadius: '50%', 
+                                    fontSize: '0.6rem', 
+                                    fontWeight: 900,
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    border: '2px solid #0f172a'
+                                }}>
+                                    {cartItems.length}
+                                </div>
+                            )}
+                        </button>
+                    ) : (
+                        <Link to="/admin/login" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textDecoration: 'none', fontWeight: 600 }}>ADMIN</Link>
+                    )}
                 </div>
 
                 {user ? (
@@ -222,11 +225,14 @@ const NavBar: React.FC = () => {
                         </Link>
 
                         <button onClick={handleLogout} className="sign-out-trigger" title="Terminate Session">
-                            <span style={{ fontSize: '1.1rem' }}>⏻</span>
+                            <span style={{ fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⏻</span>
                         </button>
                     </>
                 ) : (
-                    <Link to="/login" className="btn-gold" style={{ padding: '10px 22px', fontSize: '0.8rem' }}>Access</Link>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, padding: '10px 15px' }}>Login</Link>
+                        <Link to="/register" className="btn-gold" style={{ padding: '10px 22px', fontSize: '0.85rem' }}>Join Now</Link>
+                    </div>
                 )}
             </div>
 

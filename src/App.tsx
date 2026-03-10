@@ -16,7 +16,14 @@ import MenuCatalog from './pages/MenuCatalog';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import NavBar from './components/NavBar';
-import './App.css';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
+// Protected Route Component
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+    const { user } = useAuth();
+    return user ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
 const App: React.FC = () => {
     return (
@@ -29,18 +36,23 @@ const App: React.FC = () => {
 
                         <main className="content">
                             <Routes>
+                                {/* Public Routes */}
                                 <Route path="/" element={<Landing />} />
                                 <Route path="/register" element={<Register />} />
                                 <Route path="/login" element={<Login />} />
-                                <Route path="/home" element={<Home />} /> 
-                                <Route path="/menu" element={<MenuCatalog />} />
-                                <Route path="/profile/:id" element={<Profile />} />
-                                <Route path="/payments/checkout" element={<PaymentCheckout />} />
-                                <Route path="/payments/checkout/:orderId" element={<PaymentCheckout />} />
-                                <Route path="/payments" element={<UserPayments />} />
-                                <Route path="/payments/:id" element={<PaymentDetail />} />
-                                <Route path="/payments/:id/invoice" element={<PaymentInvoice />} />
                                 <Route path="/admin/login" element={<AdminLogin />} />
+
+                                {/* Guarded Routes */}
+                                <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} /> 
+                                <Route path="/menu" element={<PrivateRoute><MenuCatalog /></PrivateRoute>} />
+                                <Route path="/profile/:id" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                                <Route path="/payments/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+                                <Route path="/payments/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+                                <Route path="/payments" element={<PrivateRoute><UserPayments /></PrivateRoute>} />
+                                <Route path="/payments/:id" element={<PrivateRoute><PaymentDetail /></PrivateRoute>} />
+                                <Route path="/payments/:id/invoice" element={<PrivateRoute><PaymentInvoice /></PrivateRoute>} />
+                                
+                                {/* Admin Guarded (Assuming separate logic or just open for now) */}
                                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                             </Routes>
                         </main>

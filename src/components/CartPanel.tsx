@@ -82,6 +82,7 @@ const CartPanel: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     padding: '40px',
+                    paddingTop: '120px',
                     animation: 'slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
                 onClick={(e) => e.stopPropagation()}
