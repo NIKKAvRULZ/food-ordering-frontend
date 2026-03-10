@@ -51,11 +51,11 @@ const PaymentInvoice: React.FC = () => {
     );
   }
 
-  const subtotal = payment.amount;
+  const subtotal = payment.amount || 0;
   const tax = parseFloat((subtotal * 0.0).toFixed(2)); // zero tax; update if needed
   const total = subtotal + tax;
   const invoiceDate = new Date(payment.createdAt);
-  const invoiceNumber = `INV-${invoiceDate.getFullYear()}${String(invoiceDate.getMonth() + 1).padStart(2, '0')}-${payment._id.slice(-6).toUpperCase()}`;
+  const invoiceNumber = `INV-${invoiceDate.getFullYear()}${String(invoiceDate.getMonth() + 1).padStart(2, '0')}-${String(payment._id || (payment as any).id || 'N/A').slice(-6).toUpperCase()}`;
 
   return (
     <div style={{ padding: '20px 8%' }}>
@@ -105,7 +105,7 @@ const PaymentInvoice: React.FC = () => {
           <div>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: '12px' }}>Bill To</div>
             <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-              {payment.userDetails?.username || `User #${payment.userId.slice(-6)}`}
+              {payment.userDetails?.username || `User #${String(payment.userId || 'N/A').slice(-6)}`}
             </div>
             {payment.userDetails?.email && (
               <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>{payment.userDetails.email}</div>
@@ -140,14 +140,14 @@ const PaymentInvoice: React.FC = () => {
               <td style={{ padding: '14px 0', fontSize: '0.95rem' }}>
                 {payment.orderDetails?.product || 'Order Item'}
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                  Order #{payment.orderId.slice(-8).toUpperCase()}
+                  Order #{String(payment.orderId || 'N/A').slice(-8).toUpperCase()}
                 </div>
               </td>
               <td style={{ padding: '14px 0', textAlign: 'right' }}>{payment.orderDetails?.quantity ?? 1}</td>
               <td style={{ padding: '14px 0', textAlign: 'right' }}>
-                ${payment.orderDetails?.price?.toFixed(2) ?? payment.amount.toFixed(2)}
+                ${payment.orderDetails?.price?.toFixed(2) ?? (payment.amount || 0).toFixed(2)}
               </td>
-              <td style={{ padding: '14px 0', textAlign: 'right', fontWeight: 600 }}>${subtotal.toFixed(2)}</td>
+              <td style={{ padding: '14px 0', textAlign: 'right', fontWeight: 600 }}>${(subtotal || 0).toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -157,7 +157,7 @@ const PaymentInvoice: React.FC = () => {
           <div style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
               <span style={{ color: 'var(--text-dim)' }}>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>${(subtotal || 0).toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
               <span style={{ color: 'var(--text-dim)' }}>Tax (0%)</span>
@@ -167,7 +167,7 @@ const PaymentInvoice: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 600 }}>Total</span>
               <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-                ${total.toFixed(2)} <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-dim)' }}>{payment.currency.toUpperCase()}</span>
+                ${(total || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-dim)' }}>{(payment.currency || 'USD').toUpperCase()}</span>
               </span>
             </div>
           </div>

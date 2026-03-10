@@ -28,6 +28,7 @@ export const triggerOrderEmail = (userId: string) => axios.post(`${NOTIFICATION_
 export const getCatalogStatus = () => axios.get(`${CATALOG_URL}/health`);
 
 export const getMenuItems = () => axios.get(`${CATALOG_URL}/menu/items`);
+export const getCategories = () => axios.get(`${CATALOG_URL}/menu/categories`);
 export const createMenuItem = (data: any) => axios.post(`${CATALOG_URL}/menu/items`, data);
 export const updateMenuItem = (id: string | number, data: any) => axios.put(`${CATALOG_URL}/menu/items/${id}`, data);
 export const deleteMenuItem = (id: string | number) => axios.delete(`${CATALOG_URL}/menu/items/${id}`);

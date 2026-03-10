@@ -83,7 +83,7 @@ const UserPayments: React.FC = () => {
           { label: 'Total Payments', value: payments.length, color: 'var(--accent-gold)' },
           { label: 'Completed', value: payments.filter(p => p.status === 'completed').length, color: '#10b981' },
           { label: 'Pending', value: payments.filter(p => p.status === 'pending').length, color: '#fbbf24' },
-          { label: 'Total Spent', value: `$${totalSpent.toFixed(2)}`, color: 'var(--accent-gold)' },
+          { label: 'Total Spent', value: `$${(totalSpent || 0).toFixed(2)}`, color: 'var(--accent-gold)' },
         ].map((stat) => (
           <div key={stat.label} className="glass-panel" style={{ padding: '20px 24px', borderRadius: '18px' }}>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>{stat.label}</div>
@@ -124,7 +124,7 @@ const UserPayments: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {paginated.map((p) => (
               <div
-                key={p._id}
+                key={p._id || (p as any).id}
                 className="glass-panel"
                 style={{
                   padding: '20px 28px',
@@ -136,7 +136,7 @@ const UserPayments: React.FC = () => {
                   gap: '20px',
                   borderLeft: `3px solid ${STATUS_COLOR[p.status]?.color || '#94a3b8'}`,
                 }}
-                onClick={() => navigate(`/payments/${p._id}`)}
+                onClick={() => navigate(`/payments/${p._id || (p as any).id}`)}
               >
                 {/* Icon */}
                 <div style={{
@@ -150,7 +150,7 @@ const UserPayments: React.FC = () => {
                 {/* Main Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    Order #{p.orderId.slice(-8).toUpperCase()}
+                    Order #{String(p.orderId || 'N/A').slice(-8).toUpperCase()}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                     {new Date(p.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -163,7 +163,7 @@ const UserPayments: React.FC = () => {
                 {/* Amount */}
                 <div style={{ textAlign: 'right', minWidth: '80px' }}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: p.status === 'refunded' ? '#94a3b8' : 'var(--text-main)' }}>
-                    {p.status === 'refunded' ? '-' : ''}${p.amount.toFixed(2)}
+                    {p.status === 'refunded' ? '-' : ''}${(p.amount || 0).toFixed(2)}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{p.currency}</div>
                 </div>

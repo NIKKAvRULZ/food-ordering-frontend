@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem,
+  getMenuItems, getCategories, createMenuItem, updateMenuItem, deleteMenuItem,
   getAllOrders, deleteOrder,
   getAllPayments, refundPayment,
   getAllUsers, deleteUser
@@ -12,6 +12,7 @@ type Tab = 'menu' | 'orders' | 'payments' | 'users';
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('menu');
   const [data, setData] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editForm, setEditForm] = useState<any>(null);
   const navigate = useNavigate();
@@ -29,7 +30,12 @@ const AdminDashboard: React.FC = () => {
     try {
       let res;
       switch (activeTab) {
-        case 'menu': res = await getMenuItems(); break;
+        case 'menu': 
+          res = await getMenuItems(); 
+          // Also fetch categories if in menu tab
+          const catRes = await getCategories();
+          if (catRes.data?.success) setCategories(catRes.data.data);
+          break;
         case 'orders': res = await getAllOrders(); break;
         case 'payments': res = await getAllPayments(); break;
         case 'users': res = await getAllUsers(); break;
@@ -228,7 +234,23 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div>
               <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>CATEGORY</label>
-              <input value={editForm.categoryName} onChange={e => setEditForm({...editForm, categoryName: e.target.value})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
+              <select 
+                value={editForm.categoryId} 
+                onChange={e => {
+                  const selectedCat = categories.find(c => c.id === parseInt(e.target.value));
+                  setEditForm({
+                    ...editForm, 
+                    categoryId: selectedCat?.id, 
+                    categoryName: selectedCat?.name 
+                  });
+                }} 
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%', cursor: 'pointer' }}
+              >
+                <option value="" disabled style={{ background: '#1e293b' }}>Select Category</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id} style={{ background: '#1e293b' }}>{cat.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>PRICE (LKR)</label>

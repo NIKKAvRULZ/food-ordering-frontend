@@ -97,12 +97,12 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
           <div><span style={{ color: 'var(--text-dim)' }}>Qty</span></div>
           <div style={{ textAlign: 'right' }}>{orderInfo.quantity}</div>
           <div><span style={{ color: 'var(--text-dim)' }}>Unit Price</span></div>
-          <div style={{ textAlign: 'right' }}>${orderInfo.price.toFixed(2)}</div>
+          <div style={{ textAlign: 'right' }}>${(orderInfo.price || 0).toFixed(2)}</div>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Total</span>
           <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-            ${(orderInfo.price * orderInfo.quantity).toFixed(2)}
+            ${((orderInfo.price || 0) * (orderInfo.quantity || 1)).toFixed(2)}
           </span>
         </div>
       </div>
@@ -145,7 +145,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
         disabled={processing || !stripe}
         style={{ padding: '15px', fontSize: '1rem', letterSpacing: '0.5px' }}
       >
-        {processing ? 'Processing Payment...' : `Pay $${(orderInfo.price * orderInfo.quantity).toFixed(2)}`}
+        {processing ? 'Processing Payment...' : `Pay $${((orderInfo.price || 0) * (orderInfo.quantity || 1)).toFixed(2)}`}
       </button>
     </form>
   );
@@ -280,7 +280,7 @@ const PaymentCheckout: React.FC = () => {
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 300, margin: '0 0 4px 0' }}>
                   Complete <span style={{ color: 'var(--accent-gold)' }}>Payment</span>
                 </h2>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', margin: 0 }}>Order #{orderId.slice(-8).toUpperCase()}</p>
+                <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', margin: 0 }}>Order #{String(orderId).slice(-8).toUpperCase()}</p>
               </div>
               <button onClick={() => setStep('input')} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '0.8rem' }}>
                 ← Back

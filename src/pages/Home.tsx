@@ -1,33 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { getMenuItems } from '../services/api';
+import { Link, Navigate } from 'react-router-dom';
+import { getMenuItems, getUserOrders } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Home: React.FC = () => {
-  const { user, statuses, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, statuses } = useAuth();
 
   const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [orderCount, setOrderCount] = useState<number>(0);
 
   useEffect(() => {
-    if (user && statuses.catalog === 'live') {
-      getMenuItems()
-        .then(res => {
-          if (res.data && res.data.success && Array.isArray(res.data.data)) {
-            let processedItems: any[] = res.data.data;
-            
-            if (user?.vegan) {
-               processedItems = processedItems.filter((i: any) => 
-                 (i.categoryName && i.categoryName.toLowerCase().includes('veg')) || 
-                 (i.description && i.description.toLowerCase().includes('veg')) ||
-                 (i.name && i.name.toLowerCase().includes('veg'))
-               );
+    if (user) {
+      // Fetch Catalog Items
+      if (statuses.catalog === 'live') {
+        getMenuItems()
+          .then(res => {
+            if (res.data && res.data.success && Array.isArray(res.data.data)) {
+              let processedItems: any[] = res.data.data;
+              if (user?.vegan) {
+                processedItems = processedItems.filter((i: any) => 
+                  (i.categoryName && i.categoryName.toLowerCase().includes('veg')) || 
+                  (i.description && i.description.toLowerCase().includes('veg')) ||
+                  (i.name && i.name.toLowerCase().includes('veg'))
+                );
+              }
+              setMenuItems(processedItems.slice(0, 4));
             }
-            
-            setMenuItems(processedItems.slice(0, 4)); // Get first 4 items based on filter
-          }
+          })
+          .catch(err => console.error("Failed to fetch menu items", err));
+      }
+
+      // Fetch Real Order Count
+      getUserOrders(user.id)
+        .then(res => {
+          const orders = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+          setOrderCount(orders.length);
         })
-        .catch(err => console.error("Failed to fetch menu items", err));
+        .catch(err => console.error("Failed to fetch order count", err));
     }
   }, [user, statuses.catalog]);
 
@@ -36,126 +45,138 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '40px 8%' }}>
-      {/* Header Section with Node Status */}
-      <div style={{ marginBottom: '50px' }}>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div className={`status-dot ${statuses.identity}`}></div>
-            <span style={{ fontSize: '0.65rem', letterSpacing: '1px', fontWeight: 700 }}>
-              IDENTITY: {statuses.identity.toUpperCase()}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div className={`status-dot ${statuses.catalog}`}></div>
-            <span style={{ fontSize: '0.65rem', letterSpacing: '1px', fontWeight: 700 }}>
-              CATALOG: {statuses.catalog.toUpperCase()}
-            </span>
+    <div style={{ padding: '40px 8%', maxWidth: '1400px', margin: '0 auto' }}>
+      {/* Hero Section */}
+      <div className="fade-in" style={{ 
+        position: 'relative', 
+        borderRadius: '30px', 
+        overflow: 'hidden', 
+        marginBottom: '40px',
+        padding: '60px',
+        background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.05) 100%)',
+        border: '1px solid var(--glass-border)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: '300px'
+      }}>
+        <div style={{ position: 'absolute', right: '-50px', top: '-50px', width: '300px', height: '300px', background: 'var(--accent-gold)', filter: 'blur(100px)', opacity: 0.1, borderRadius: '50%' }}></div>
+        
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <span className="badge" style={{ marginBottom: '15px' }}>🚀 Fast Delivery in 30 Mins</span>
+          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, margin: '0 0 10px 0', lineHeight: 1.1 }}>
+            Deliciousness <span style={{ color: 'var(--accent-gold)' }}>Delivered</span>
+          </h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', maxWidth: '500px', marginBottom: '30px' }}>
+            Get the best flavors from our kitchen straight to your doorstep. Hot, fresh, and gourmet.
+          </p>
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <Link to="/menu" className="btn-gold" style={{ padding: '12px 35px', textDecoration: 'none' }}>Explore Menu</Link>
+            <Link to="/payments" style={{ padding: '12px 35px', borderRadius: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', textDecoration: 'none', border: '1px solid var(--glass-border)', fontWeight: 600 }}>My Orders</Link>
           </div>
         </div>
-        <h1 style={{ fontSize: '3rem', fontWeight: 300, margin: 0 }}>
-          Welcome, <span style={{ color: 'var(--accent-gold)' }}>{user.username}</span>
-        </h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '40px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '40px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           
-         
-          {/* DYNAMIC: Integration Showcase Section */}
-          <div className="glass-panel" style={{ 
+          {/* Quick Categories */}
+          <div className="fade-in" style={{ animationDelay: '0.1s' }}>
+            <h3 style={{ fontWeight: 600, marginBottom: '20px', fontSize: '1.5rem' }}>Popular Categories</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+              {['Burgers', 'Pizza', 'Desserts', 'Vegan'].map((cat, i) => (
+                <div key={i} className="glass-panel" style={{ padding: '20px', textAlign: 'center', cursor: 'pointer', transition: 'transform 0.2s' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '10px' }}>{i === 0 ? '🍔' : i === 1 ? '🍕' : i === 2 ? '🍰' : '🥗'}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{cat}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DYNAMIC: Integration Showcase Section (Vegan Recommendations) */}
+          <div className="glass-panel fade-in" style={{ 
             padding: '40px', 
             borderLeft: `4px solid ${statuses.catalog === 'live' ? 'var(--accent-gold)' : '#ef4444'}`,
-            transition: 'all 0.3s ease'
+            animationDelay: '0.2s'
           }}>
-            <h3 style={{ 
-              color: statuses.catalog === 'live' ? 'var(--accent-gold)' : '#ef4444', 
-              marginTop: 0, 
-              fontWeight: 400 
-            }}>
-              {statuses.catalog === 'live' ? (user?.vegan ? '🌱 Your Vegan Recommendations' : '🎁 Today\'s Special Menu') : '⚠️ Integration Offline'}
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+              <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.5rem' }}>
+                {statuses.catalog === 'live' ? (user?.vegan ? '🌱 Curated Vegan Picks' : '🔥 Chef\'s Specials') : '⚠️ System Offline'}
+              </h3>
+              <Link to="/menu" style={{ color: 'var(--accent-gold)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>See All →</Link>
+            </div>
 
             {statuses.catalog === 'live' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
                 {menuItems.length > 0 ? menuItems.map((item, idx) => (
-                  <div key={idx} className="food-card fade-in" style={{ animationDelay: `${idx * 0.1}s` }}>
+                  <div key={idx} className="food-card">
                     {item.imageUrl && (
-                       <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px' }} />
+                       <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
                     )}
-                    <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>{item.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', flexGrow: 1 }}>{item.description}</div>
+                    <h4 style={{ margin: '8px 0 4px 0', fontSize: '1.1rem' }}>{item.name}</h4>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', height: '40px', overflow: 'hidden' }}>{item.description}</p>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>LKR {(item.price || 0).toFixed(2)}</span>
-                      <span style={{ fontSize: '0.65rem', background: user?.vegan ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255,255,255,0.1)', color: user?.vegan ? '#4ade80' : 'var(--text-main)', padding: '2px 6px', borderRadius: '4px' }}>
-                        {item.categoryName}
-                      </span>
+                      <span style={{ fontWeight: 800, color: '#fff' }}>LKR {item.price}</span>
+                      <button style={{ background: 'var(--accent-gold)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}>+</button>
                     </div>
                   </div>
                 )) : (
-                  <p style={{ fontStyle: 'italic', color: 'var(--text-dim)' }}>Loading specials...</p>
+                  <p style={{ fontStyle: 'italic', color: 'var(--text-dim)' }}>Initializing catalog...</p>
                 )}
               </div>
             ) : (
-              <p style={{ fontSize: '1.2rem', fontStyle: 'italic', marginBottom: '15px' }}>
-                The Identity Service cannot reach the Catalog Node to fetch your personalized deals.
-              </p>
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)' }}>Catalog service is currently unavailable.</p>
+              </div>
             )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="badge" style={{ 
-                background: statuses.catalog === 'live' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', 
-                color: statuses.catalog === 'live' ? '#4ade80' : '#f87171', 
-                fontSize: '0.7rem' 
-              }}>
-                {statuses.catalog === 'live' ? 'INTER-SERVICE HANDSHAKE VERIFIED' : 'HANDSHAKE FAILED'}
-              </span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
-                Target: {import.meta.env.VITE_CATALOG_URL || "Catalog Microservice"}
-              </span>
-            </div>
-          </div>
-
-          <div className="glass-panel" style={{ padding: '40px' }}>
-            <h3 style={{ marginBottom: '30px', fontWeight: 400 }}>System Capabilities</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '30px' }}>
-              <FeatureCard icon="🔐" title="Secure Auth" desc="Encrypted pathways via Spring Security 6." />
-              <FeatureCard icon="☁️" title="Cloud Native" desc="Docker containerized on Render PaaS." />
-              <FeatureCard icon="🛡️" title="DevSecOps" desc="Continuous Snyk SAST vulnerability monitoring." />
-            </div>
           </div>
         </div>
 
-        {/* Sidebar: Account Summary */}
-        <div className="glass-panel" style={{ padding: '30px', height: 'fit-content' }}>
-          <h4 style={{ color: 'var(--accent-gold)', marginTop: 0 }}>Account Summary</h4>
-          <div style={{ fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', opacity: 0.5 }}>EMAIL</label>
-              <span>{user.email}</span>
+        {/* Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          {/* User Profile Summary */}
+          <div className="glass-panel fade-in" style={{ padding: '30px', borderTop: '4px solid var(--accent-gold)', animationDelay: '0.3s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--accent-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#000', fontWeight: 800, flexShrink: 0 }}>
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ overflow: 'hidden' }}>
+                <h4 style={{ margin: 0, fontSize: '1.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-dim)' }}>{user.email}</p>
+              </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', opacity: 0.5 }}>DELIVERY ADDRESS</label>
-              <span>{user.deliveryAddress || 'Not set'}</span>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Dietary Mode:</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: user.vegan ? '#4ade80' : 'var(--accent-gold)' }}>{user.vegan ? '🌱 Vegan' : '🥩 Standard'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Order History:</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{orderCount} Total</span>
+              </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.65rem', opacity: 0.5 }}>DIETARY PREFERENCE</label>
-              <span style={{ color: user.vegan ? '#4ade80' : 'var(--text-main)', fontWeight: user.vegan ? 600 : 400 }}>
-                {user.vegan ? '🌱 Vegan' : '🥩 Standard'}
-              </span>
-            </div>
-          </div>
-          
-          <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Link to="/menu" className="btn-gold" style={{ textAlign: 'center', fontSize: '0.85rem' }}>
-              Order Gourmet Food
+
+            <Link to={`/profile/${user.id}`} className="btn-gold" style={{ 
+              width: '100%', 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              boxSizing: 'border-box',
+              textDecoration: 'none', 
+              fontSize: '0.9rem' 
+            }}>
+              Edit My Profile
             </Link>
-            <button 
-              onClick={() => { logout(); navigate('/'); }}
-              style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff', padding: '10px', borderRadius: '100px', cursor: 'pointer' }}
-            >
-              Sign Out
-            </button>
+          </div>
+
+          {/* Service Status */}
+          <div className="glass-panel fade-in" style={{ padding: '25px', animationDelay: '0.4s' }}>
+            <h4 style={{ margin: '0 0 15px 0', fontSize: '0.9rem', letterSpacing: '1px', color: 'var(--text-dim)' }}>NETWORK STATUS</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <StatusItem label="Identity Service" status={statuses.identity} />
+              <StatusItem label="Catalog Service" status={statuses.catalog} />
+            </div>
           </div>
         </div>
       </div>
@@ -163,11 +184,13 @@ const Home: React.FC = () => {
   );
 };
 
-const FeatureCard = ({ icon, title, desc }: any) => (
-  <div>
-    <span style={{ fontSize: '1.5rem', display: 'block', marginBottom: '10px' }}>{icon}</span>
-    <h4 style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>{title}</h4>
-    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0 }}>{desc}</p>
+const StatusItem = ({ label, status }: any) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <span style={{ fontSize: '0.8rem' }}>{label}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>{status.toUpperCase()}</span>
+      <div className={`status-dot ${status}`} style={{ width: '8px', height: '8px' }}></div>
+    </div>
   </div>
 );
 

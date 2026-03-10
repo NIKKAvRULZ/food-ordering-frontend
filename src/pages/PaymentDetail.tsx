@@ -98,7 +98,7 @@ const PaymentDetail: React.FC = () => {
           <div>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: '8px' }}>Payment Detail</div>
             <h1 style={{ fontSize: '2.2rem', fontWeight: 300, margin: 0 }}>
-              #{payment._id.slice(-8).toUpperCase()}
+              #{String(payment._id || (payment as any).id || 'N/A').slice(-8).toUpperCase()}
             </h1>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -113,7 +113,7 @@ const PaymentDetail: React.FC = () => {
             {payment.status === 'completed' && (
               <>
                 <Link
-                  to={`/payments/${payment._id}/invoice`}
+                  to={`/payments/${payment._id || (payment as any).id}/invoice`}
                   style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff', padding: '8px 18px', borderRadius: '100px', fontSize: '0.8rem', textDecoration: 'none' }}
                 >
                   Invoice
@@ -136,7 +136,7 @@ const PaymentDetail: React.FC = () => {
         <div>
           <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '4px' }}>Total Amount</div>
           <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--accent-gold)', lineHeight: 1 }}>
-            ${payment.amount.toFixed(2)}
+            ${(payment.amount || 0).toFixed(2)}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>{payment.currency}</div>
         </div>
@@ -172,7 +172,7 @@ const PaymentDetail: React.FC = () => {
         {activeTab === 'payment' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
             {[
-              { label: 'Payment ID', value: payment._id },
+              { label: 'Payment ID', value: payment._id || (payment as any).id || 'N/A' },
               { label: 'Order ID', value: payment.orderId },
               { label: 'User ID', value: payment.userId },
               { label: 'Currency', value: payment.currency.toUpperCase() },
@@ -197,7 +197,7 @@ const PaymentDetail: React.FC = () => {
               { label: 'Order ID', value: payment.orderDetails.id },
               { label: 'Product', value: payment.orderDetails.product },
               { label: 'Quantity', value: payment.orderDetails.quantity.toString() },
-              { label: 'Unit Price', value: `$${payment.orderDetails.price.toFixed(2)}` },
+              { label: 'Unit Price', value: `$${(payment.orderDetails.price || 0).toFixed(2)}` },
               { label: 'Order Status', value: payment.orderDetails.status },
               { label: 'Customer ID', value: payment.orderDetails.userId },
             ].map(({ label, value }) => (
@@ -247,7 +247,7 @@ const PaymentDetail: React.FC = () => {
           <div className="glass-panel" style={{ width: '100%', maxWidth: '440px', padding: '36px' }}>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 400, marginBottom: '8px' }}>Request <span style={{ color: '#ef4444' }}>Refund</span></h3>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '28px' }}>
-              Amount to refund: <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>${payment.amount.toFixed(2)}</span>
+              Amount to refund: <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>${(payment.amount || 0).toFixed(2)}</span>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
               <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Reason (optional)</label>

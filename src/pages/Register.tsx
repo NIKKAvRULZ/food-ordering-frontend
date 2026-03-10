@@ -46,42 +46,47 @@ const Register: React.FC = () => {
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
-            padding: '0px 20px',
-            minHeight: 'calc(100vh - 100px)' 
+            padding: '40px 20px',
+            minHeight: 'calc(100vh - 100px)',
+            position: 'relative',
+            overflow: 'hidden'
         }}>
-            <div className="glass-panel" style={{ 
+             {/* Background Decorations */}
+             <div style={{ position: 'absolute', top: '10%', right: '-5%', width: '500px', height: '500px', background: 'var(--accent-gold)', filter: 'blur(180px)', opacity: 0.05, borderRadius: '50%' }}></div>
+             <div style={{ position: 'absolute', bottom: '0%', left: '-10%', width: '400px', height: '400px', background: 'var(--accent-secondary)', filter: 'blur(150px)', opacity: 0.05, borderRadius: '50%' }}></div>
+
+            <div className="glass-panel fade-in" style={{ 
                 width: '100%', 
-                maxWidth: '500px',
-                textAlign: 'left' // Ensure text alignment is consistent
+                maxWidth: '550px',
+                textAlign: 'left',
+                position: 'relative',
+                zIndex: 1,
+                padding: '50px'
             }}>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 300, marginBottom: '8px' }}>Join the Network</h2>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '32px' }}>
-                    Create a secure identity for gourmet delivery.
-                </p>
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '15px' }}>🛰️</div>
+                    <h2 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-1px' }}>Join the Network</h2>
+                    <p style={{ color: 'var(--text-dim)', fontSize: '1rem' }}>Initialize your operative node today.</p>
+                </div>
                 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {/* Row 1: Username & Email */}
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: '1fr 1fr', 
-                        gap: '16px' 
-                    }}>
-                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Username</label>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '10px' }}>Protocol Name</label>
                             <input 
                                 type="text" 
-                                placeholder="Nikka99"
+                                placeholder="Operative"
                                 value={formData.username}
                                 onChange={(e) => setFormData({...formData, username: e.target.value})}
                                 required 
                                 style={{ width: '100%', boxSizing: 'border-box' }}
                             />
                         </div>
-                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Email</label>
+                        <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
+                            <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '10px' }}>Comms Email</label>
                             <input 
                                 type="email" 
-                                placeholder="name@email.com"
+                                placeholder="name@network.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 required 
@@ -90,9 +95,8 @@ const Register: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Row 2: Password */}
                     <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
-                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Password</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '10px' }}>Access Cipher</label>
                         <input 
                             type="password" 
                             placeholder="••••••••"
@@ -103,12 +107,11 @@ const Register: React.FC = () => {
                         />
                     </div>
 
-                    {/* Row 3: Delivery Address */}
                     <div className="form-group" style={{ display: 'flex', flexDirection: 'column' }}>
-                        <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>Delivery Address</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '10px' }}>Delivery Coordinates</label>
                         <input 
                             type="text" 
-                            placeholder="Street, City, Country"
+                            placeholder="Physical Address"
                             value={formData.deliveryAddress}
                             onChange={(e) => setFormData({...formData, deliveryAddress: e.target.value})}
                             required 
@@ -116,53 +119,51 @@ const Register: React.FC = () => {
                         />
                     </div>
 
-                    {/* Row 4: Preferences */}
-                    <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="form-group" style={{ 
+                        background: 'rgba(255,255,255,0.03)', 
+                        padding: '15px 20px', 
+                        borderRadius: '15px', 
+                        border: '1px solid var(--glass-border)',
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '12px',
+                        cursor: 'pointer'
+                    }} onClick={() => setFormData({...formData, vegan: !formData.vegan})}>
                         <input 
                             type="checkbox" 
                             id="vegan-checkbox"
                             checked={formData.vegan}
                             onChange={(e) => setFormData({...formData, vegan: e.target.checked})}
-                            style={{ accentColor: 'var(--accent-gold)' }}
+                            style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--accent-gold)' }}
                         />
-                        <label htmlFor="vegan-checkbox" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-                            I prefer <span style={{ color: '#4ade80', fontWeight: 600 }}>Vegan</span> meals 🥗
+                        <label htmlFor="vegan-checkbox" style={{ fontSize: '0.95rem', color: 'var(--text-main)', cursor: 'pointer' }}>
+                            Prioritize <span style={{ color: '#4ade80', fontWeight: 800 }}>VEGAN</span> culinary nodes 🥗
                         </label>
                     </div>
 
-                    <button 
-                        type="submit" 
-                        className="btn-gold" 
-                        style={{ 
-                            width: '100%', 
-                            marginTop: '10px',
-                            padding: '14px' 
-                        }} 
-                        disabled={loading}
-                    >
-                        {loading ? 'Verifying Identity...' : 'Register Now'}
+                    <button type="submit" className="btn-gold" style={{ width: '100%', marginTop: '10px', padding: '16px', fontSize: '1.1rem' }} disabled={loading}>
+                        {loading ? 'Broadcasting Data...' : 'Initialize Node'}
                     </button>
                 </form>
 
-                {/* Status Messages */}
                 {message && (
-                    <div style={{ 
+                    <div className="fade-in" style={{ 
                         marginTop: '24px', 
-                        padding: '12px',
-                        borderRadius: '12px',
+                        padding: '15px',
+                        borderRadius: '15px',
                         textAlign: 'center', 
-                        fontSize: '0.85rem',
+                        fontSize: '0.9rem',
                         background: message.includes('✅') ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                         border: `1px solid ${message.includes('✅') ? 'var(--success)' : '#ef4444'}`,
-                        color: message.includes('✅') ? 'var(--success)' : '#ef4444' 
+                        color: message.includes('✅') ? 'var(--success)' : '#f87171' 
                     }}>
                         {message}
                     </div>
                 )}
 
-                <p style={{ textAlign: 'center', marginTop: '32px', fontSize: '0.9rem', color: 'var(--text-dim)' }}>
-                    Already registered? <Link to="/login" style={{ color: 'var(--accent-gold)', textDecoration: 'none', fontWeight: 600 }}>Sign In</Link>
-                </p>
+                <div style={{ textAlign: 'center', marginTop: '40px', fontSize: '0.95rem', color: 'var(--text-dim)', borderTop: '1px solid var(--glass-border)', paddingTop: '30px' }}>
+                    Already an operative? <Link to="/login" style={{ color: 'var(--accent-gold)', textDecoration: 'none', fontWeight: 700, marginLeft: '5px' }}>Login Station</Link>
+                </div>
             </div>
         </div>
     );
