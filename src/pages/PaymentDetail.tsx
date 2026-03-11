@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { getPaymentWithDetails, refundPayment } from '../services/paymentApi';
 import type { PaymentWithDetails, PaymentStatus } from '../types/payment';
 
-const STATUS_COLOR: Record<PaymentStatus, { bg: string; color: string; label: string }> = {
-  completed: { bg: 'rgba(16,185,129,0.15)',  color: '#10b981', label: 'COMPLETED' },
-  processing:{ bg: 'rgba(56,189,248,0.15)',  color: '#38bdf8', label: 'PROCESSING' },
-  pending:   { bg: 'rgba(251,191,36,0.15)',   color: '#fbbf24', label: 'PENDING' },
-  failed:    { bg: 'rgba(239,68,68,0.15)',    color: '#ef4444', label: 'FAILED' },
-  refunded:  { bg: 'rgba(148,163,184,0.15)',  color: '#94a3b8', label: 'REFUNDED' },
+const STATUS_COLOR: Record<string, { bg: string; color: string; label: string }> = {
+  succeeded:  { bg: 'rgba(16,185,129,0.15)',  color: '#10b981', label: 'SUCCEEDED' },
+  completed:  { bg: 'rgba(16,185,129,0.15)',  color: '#10b981', label: 'COMPLETED' },
+  processing: { bg: 'rgba(56,189,248,0.15)',  color: '#38bdf8', label: 'PROCESSING' },
+  pending:    { bg: 'rgba(251,191,36,0.15)',   color: '#fbbf24', label: 'PENDING' },
+  failed:     { bg: 'rgba(239,68,68,0.15)',    color: '#ef4444', label: 'FAILED' },
+  refunded:   { bg: 'rgba(148,163,184,0.15)',  color: '#94a3b8', label: 'REFUNDED' },
 };
 
 type Tab = 'payment' | 'order' | 'timeline';
@@ -36,7 +37,18 @@ const PaymentDetail: React.FC = () => {
       setLoading(true);
       try {
         const res = await getPaymentWithDetails(id);
-        setPayment(res.data);
+        const raw = res.data?.data ?? (res.data as any);
+        // Backend /details returns { payment, order, user } — unwrap and merge
+        if (raw?.payment) {
+          const merged: PaymentWithDetails = {
+            ...raw.payment.toObject?.() ?? raw.payment,
+            orderDetails: raw.order ?? raw.payment.orderDetails ?? null,
+            userDetails: raw.user ?? raw.payment.userDetails ?? null,
+          };
+          setPayment(merged);
+        } else {
+          setPayment(raw as PaymentWithDetails);
+        }
       } catch {
         setError('Payment record not found.');
       } finally {
@@ -52,7 +64,8 @@ const PaymentDetail: React.FC = () => {
     setRefundError('');
     try {
       const res = await refundPayment(id, { reason: refundReason || undefined });
-      setPayment(res.data as PaymentWithDetails);
+      const updated = res.data?.data ?? (res.data as any);
+      setPayment(updated as PaymentWithDetails);
       setShowRefund(false);
       setRefundReason('');
     } catch (err: any) {
@@ -110,7 +123,7 @@ const PaymentDetail: React.FC = () => {
             }}>
               ● {statusCfg.label}
             </span>
-            {payment.status === 'completed' && (
+            {(payment.status === 'succeeded' || payment.status === 'completed') && (
               <>
                 <Link
                   to={`/payments/${payment._id || (payment as any).id}/invoice`}
@@ -136,9 +149,9 @@ const PaymentDetail: React.FC = () => {
         <div>
           <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '4px' }}>Total Amount</div>
           <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--accent-gold)', lineHeight: 1 }}>
-            ${Number(payment.amount || 0).toFixed(2)}
+            Rs. {Number(payment.amount || 0).toFixed(2)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>{payment.currency}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>{payment.currency || 'LKR'}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '4px' }}>Date</div>
@@ -185,7 +198,7 @@ const PaymentDetail: React.FC = () => {
             ].map(({ label, value }) => (
               <div key={label} style={{ borderBottom: '1px solid var(--glass-border)', paddingBottom: '16px' }}>
                 <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '6px' }}>{label}</div>
-                <div style={{ fontSize: '0.9rem', fontFamily: value.length > 20 ? 'monospace' : 'inherit', wordBreak: 'break-all', color: 'var(--text-main)' }}>{value}</div>
+                <div style={{ fontSize: '0.9rem', fontFamily: String(value ?? '').length > 20 ? 'monospace' : 'inherit', wordBreak: 'break-all', color: 'var(--text-main)' }}>{value ?? '—'}</div>
               </div>
             ))}
           </div>
@@ -197,7 +210,7 @@ const PaymentDetail: React.FC = () => {
               { label: 'Order ID', value: payment.orderDetails.id || (payment.orderDetails as any)._id },
               { label: 'Structure', value: payment.orderDetails.product ? 'Legacy Product' : 'Modern Multi-Item' },
               { label: 'Item Summary', value: payment.orderDetails.product || ((payment.orderDetails as any).items?.length ? `${(payment.orderDetails as any).items.length} items` : 'N/A') },
-              { label: 'Total Value', value: `$${Number(payment.orderDetails.price || (payment.orderDetails as any).totalAmount || 0).toFixed(2)}` },
+              { label: 'Total Value', value: `Rs. ${Number(payment.orderDetails.price || (payment.orderDetails as any).totalAmount || (payment.orderDetails as any).totalPrice || 0).toFixed(2)}` },
               { label: 'Order Status', value: (payment.orderDetails.status || 'N/A').toUpperCase() },
               { label: 'Customer ID', value: payment.orderDetails.userId },
             ].map(({ label, value }) => (
@@ -217,7 +230,7 @@ const PaymentDetail: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {[
               { icon: '📋', label: 'Payment Created', time: payment.createdAt, desc: 'Payment record initiated in the system.', color: 'var(--accent-gold)' },
-              ...(payment.status !== 'pending' ? [{ icon: payment.status === 'completed' ? '✅' : '❌', label: payment.status === 'completed' ? 'Payment Completed' : 'Payment Failed', time: payment.updatedAt, desc: payment.status === 'completed' ? 'Funds captured via Stripe.' : 'Transaction declined by payment processor.', color: payment.status === 'completed' ? '#10b981' : '#ef4444' }] : []),
+              ...(payment.status !== 'pending' ? [{ icon: (payment.status === 'succeeded' || payment.status === 'completed') ? '✅' : '❌', label: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Payment Succeeded' : 'Payment Failed', time: payment.updatedAt, desc: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Funds captured via Stripe.' : 'Transaction declined by payment processor.', color: (payment.status === 'succeeded' || payment.status === 'completed') ? '#10b981' : '#ef4444' }] : []),
               ...(payment.status === 'refunded' ? [{ icon: '↩', label: 'Refund Issued', time: payment.updatedAt, desc: `Refund processed. Reason: ${payment.refundReason || 'Not specified'}`, color: '#94a3b8' }] : []),
             ].map((event, idx) => (
               <div key={idx} style={{ display: 'flex', gap: '16px', paddingBottom: '24px', position: 'relative' }}>
@@ -247,7 +260,7 @@ const PaymentDetail: React.FC = () => {
           <div className="glass-panel" style={{ width: '100%', maxWidth: '440px', padding: '36px' }}>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 400, marginBottom: '8px' }}>Request <span style={{ color: '#ef4444' }}>Refund</span></h3>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '28px' }}>
-              Amount to refund: <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>${(payment.amount || 0).toFixed(2)}</span>
+              Amount to refund: <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>Rs. {(payment.amount || 0).toFixed(2)}</span>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
               <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Reason (optional)</label>

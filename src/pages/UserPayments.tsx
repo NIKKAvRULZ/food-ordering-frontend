@@ -2,9 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getPaymentsByUser } from '../services/paymentApi';
+import { getUserOrders } from '../services/api';
 import type { Payment, PaymentStatus } from '../types/payment';
 
-const STATUS_COLOR: Record<PaymentStatus, { bg: string; color: string; label: string }> = {
+interface PendingOrder {
+  id: number | string;
+  _id?: string;
+  status: string;
+  product: string;
+  quantity: number;
+  price?: number;
+  totalAmount?: number;
+  totalPrice?: number;
+}
+
+const STATUS_COLOR: Record<string, { bg: string; color: string; label: string }> = {
+  succeeded:  { bg: 'rgba(16,185,129,0.15)', color: '#10b981', label: 'SUCCEEDED' },
   completed:  { bg: 'rgba(16,185,129,0.15)', color: '#10b981', label: 'COMPLETED' },
   pending:    { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24', label: 'PENDING' },
   processing: { bg: 'rgba(59,130,246,0.15)',  color: '#3b82f6', label: 'PROCESSING' },
@@ -35,18 +48,21 @@ const UserPayments: React.FC = () => {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const PER_PAGE = 8;
-
-  if (!user) return <Navigate to="/login" replace />;
+  const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
 
   useEffect(() => {
+    if (!user?.id) return;
     const fetchPayments = async () => {
       setLoading(true);
       setError('');
       try {
         const res = await getPaymentsByUser(user.id?.toString() || '');
-        const list: Payment[] = Array.isArray(res.data)
-          ? res.data
-          : (res.data as any)?.data?.payments ?? [];
+        const raw = res.data as any;
+        const list: Payment[] =
+          Array.isArray(raw) ? raw :
+          Array.isArray(raw?.data?.payments) ? raw.data.payments :
+          Array.isArray(raw?.data) ? raw.data :
+          [];
         setPayments(
           [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         );
@@ -56,13 +72,36 @@ const UserPayments: React.FC = () => {
         setLoading(false);
       }
     };
-    if (user?.id) fetchPayments();
+    fetchPayments();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchPendingOrders = async () => {
+      try {
+        const res = await getUserOrders(user.id?.toString() || '');
+        const list = Array.isArray(res.data) ? res.data : [];
+        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        setPendingOrders(
+          list.filter((o: PendingOrder) =>
+            o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+          )
+        );
+      } catch {
+        // silently ignore
+      }
+    };
+    fetchPendingOrders();
+  }, [user?.id]);
+
+  if (!user) return <Navigate to="/login" replace />;
+
+  const isSuccess = (s: string) => s === 'succeeded' || s === 'completed';
 
   const totalPages = Math.ceil(payments.length / PER_PAGE);
   const paginated = payments.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const totalSpent = payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0);
+  const totalSpent = payments.filter(p => isSuccess(p.status)).reduce((sum, p) => sum + p.amount, 0);
 
   return (
     <div style={{ padding: '40px 8%' }}>
@@ -81,8 +120,8 @@ const UserPayments: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', marginBottom: '40px' }}>
         {[
           { label: 'Total Payments', value: payments.length, color: 'var(--accent-gold)' },
-          { label: 'Completed', value: payments.filter(p => p.status === 'completed').length, color: '#10b981' },
-          { label: 'Pending', value: payments.filter(p => p.status === 'pending').length, color: '#fbbf24' },
+          { label: 'Succeeded', value: payments.filter(p => isSuccess(p.status)).length, color: '#10b981' },
+          { label: 'Pending Orders', value: pendingOrders.length, color: '#fbbf24' },
           { label: 'Total Spent', value: `$${(totalSpent || 0).toFixed(2)}`, color: 'var(--accent-gold)' },
         ].map((stat) => (
           <div key={stat.label} className="glass-panel" style={{ padding: '20px 24px', borderRadius: '18px' }}>
@@ -99,7 +138,48 @@ const UserPayments: React.FC = () => {
         </button>
       </div>
 
-      {/* List */}
+      {/* Pending Orders */}
+      {pendingOrders.length > 0 && (
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#fbbf24', marginBottom: '16px' }}>
+            Pending Orders — Pay Now
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {pendingOrders.map(o => (
+              <div
+                key={String(o.id || o._id)}
+                className="glass-panel"
+                style={{
+                  padding: '20px 28px', borderRadius: '16px',
+                  display: 'flex', alignItems: 'center', gap: '20px',
+                  borderLeft: '3px solid #fbbf24',
+                }}
+              >
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(251,191,36,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  ⏳
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600 }}>Order #{String(o.id || o._id)}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{o.product} • Qty: {o.quantity}</div>
+                </div>
+                <StatusBadge status="pending" />
+                <div style={{ fontWeight: 700, minWidth: '90px', textAlign: 'right' }}>
+                  Rs. {Number(o.price || o.totalAmount || o.totalPrice || 0).toFixed(2)}
+                </div>
+                <button
+                  className="btn-gold"
+                  onClick={() => navigate(`/payments/checkout/${o.id || o._id}`)}
+                  style={{ padding: '8px 20px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                >
+                  Pay Now
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Payment History */}
       {loading ? (
         <div className="glass-panel" style={{ padding: '60px', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', color: 'var(--text-dim)' }}>
@@ -144,7 +224,7 @@ const UserPayments: React.FC = () => {
                   background: STATUS_COLOR[p.status]?.bg || 'rgba(148,163,184,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem',
                 }}>
-                  {p.status === 'completed' ? '✓' : p.status === 'failed' ? '✗' : p.status === 'refunded' ? '↩' : '⏳'}
+                  {p.status === 'succeeded' || p.status === 'completed' ? '✓' : p.status === 'failed' ? '✗' : p.status === 'refunded' ? '↩' : '⏳'}
                 </div>
 
                 {/* Main Info */}
@@ -163,9 +243,9 @@ const UserPayments: React.FC = () => {
                 {/* Amount */}
                 <div style={{ textAlign: 'right', minWidth: '80px' }}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: p.status === 'refunded' ? '#94a3b8' : 'var(--text-main)' }}>
-                    {p.status === 'refunded' ? '-' : ''}${(p.amount || 0).toFixed(2)}
+                    {p.status === 'refunded' ? '-' : ''}Rs. {(p.amount || 0).toFixed(2)}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{p.currency}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{p.currency || 'LKR'}</div>
                 </div>
 
                 {/* Arrow */}

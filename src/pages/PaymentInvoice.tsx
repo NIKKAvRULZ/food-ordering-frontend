@@ -17,7 +17,7 @@ const PaymentInvoice: React.FC = () => {
       setLoading(true);
       try {
         const res = await getInvoice(id);
-        setPayment(res.data);
+        setPayment(res.data?.data ?? (res.data as any));
       } catch {
         setError('Invoice not found.');
       } finally {
@@ -52,17 +52,21 @@ const PaymentInvoice: React.FC = () => {
   }
 
   const subtotal = payment.amount || 0;
-  const tax = parseFloat((subtotal * 0.0).toFixed(2)); // zero tax; update if needed
+  const tax = 0;
   const total = subtotal + tax;
-  const invoiceDate = new Date(payment.createdAt);
-  const invoiceNumber = `INV-${invoiceDate.getFullYear()}${String(invoiceDate.getMonth() + 1).padStart(2, '0')}-${String(payment._id || (payment as any).id || 'N/A').slice(-6).toUpperCase()}`;
+  // Backend invoice endpoint returns issuedAt + paymentId; full payment detail returns createdAt + _id
+  const rawDate = (payment as any).issuedAt || payment.createdAt;
+  const invoiceDate = rawDate ? new Date(rawDate) : new Date();
+  const paymentId = payment._id || (payment as any).paymentId || (payment as any).id || '';
+  const invoiceNumber = `INV-${invoiceDate.getFullYear()}${String(invoiceDate.getMonth() + 1).padStart(2, '0')}-${String(paymentId || 'N/A').slice(-6).toUpperCase()}`;
+  const currency = ((payment as any).currency || 'LKR').toUpperCase();
 
   return (
     <div style={{ padding: '20px 8%' }}>
 
       {/* Screen-only toolbar */}
       <div className="no-print" style={{ display: 'flex', gap: '12px', marginBottom: '24px', justifyContent: 'flex-end' }}>
-        <button onClick={() => navigate(`/payments/${payment._id}`)} style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff', padding: '8px 20px', borderRadius: '100px', cursor: 'pointer', fontSize: '0.85rem' }}>
+        <button onClick={() => navigate(`/payments/${paymentId}`)} style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff', padding: '8px 20px', borderRadius: '100px', cursor: 'pointer', fontSize: '0.85rem' }}>
           ← Detail
         </button>
         <button className="btn-gold" onClick={handlePrint} style={{ padding: '8px 24px', fontSize: '0.85rem' }}>
@@ -84,12 +88,15 @@ const PaymentInvoice: React.FC = () => {
             <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px' }}>
               {invoiceDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem', marginTop: '2px' }}>
+              {invoiceDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
             <div style={{ marginTop: '12px' }}>
               <span style={{
                 padding: '4px 12px', borderRadius: '100px', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '1px',
-                background: payment.status === 'completed' ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.15)',
-                color: payment.status === 'completed' ? '#10b981' : '#fbbf24',
-                border: `1px solid ${payment.status === 'completed' ? '#10b981' : '#fbbf24'}40`,
+                background: (payment.status === 'succeeded' || payment.status === 'completed') ? 'rgba(16,185,129,0.15)' : 'rgba(251,191,36,0.15)',
+                color: (payment.status === 'succeeded' || payment.status === 'completed') ? '#10b981' : '#fbbf24',
+                border: `1px solid ${(payment.status === 'succeeded' || payment.status === 'completed') ? '#10b981' : '#fbbf24'}40`,
               }}>
                 {payment.status.toUpperCase()}
               </span>
@@ -117,8 +124,8 @@ const PaymentInvoice: React.FC = () => {
           <div>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-dim)', marginBottom: '12px' }}>Payment Reference</div>
             <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div><span style={{ color: 'var(--text-dim)' }}>Payment ID: </span>{payment._id}</div>
-              <div><span style={{ color: 'var(--text-dim)' }}>Order ID: </span>{payment.orderId}</div>
+              <div><span style={{ color: 'var(--text-dim)' }}>Payment ID: </span>{paymentId}</div>
+              <div><span style={{ color: 'var(--text-dim)' }}>Order ID: </span>{payment.orderId || (payment as any).orderId}</div>
               {payment.stripePaymentIntentId && (
                 <div><span style={{ color: 'var(--text-dim)' }}>Stripe Intent: </span>{payment.stripePaymentIntentId}</div>
               )}
@@ -145,9 +152,9 @@ const PaymentInvoice: React.FC = () => {
               </td>
               <td style={{ padding: '14px 0', textAlign: 'right' }}>{payment.orderDetails?.quantity ?? 1}</td>
               <td style={{ padding: '14px 0', textAlign: 'right' }}>
-                ${payment.orderDetails?.price?.toFixed(2) ?? (payment.amount || 0).toFixed(2)}
+                Rs. {(payment.orderDetails?.price ?? (payment.amount || 0)).toFixed(2)}
               </td>
-              <td style={{ padding: '14px 0', textAlign: 'right', fontWeight: 600 }}>${(subtotal || 0).toFixed(2)}</td>
+              <td style={{ padding: '14px 0', textAlign: 'right', fontWeight: 600 }}>Rs. {(subtotal || 0).toFixed(2)}</td>
             </tr>
           </tbody>
         </table>
@@ -157,17 +164,17 @@ const PaymentInvoice: React.FC = () => {
           <div style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
               <span style={{ color: 'var(--text-dim)' }}>Subtotal</span>
-              <span>${(subtotal || 0).toFixed(2)}</span>
+              <span>Rs. {(subtotal || 0).toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
               <span style={{ color: 'var(--text-dim)' }}>Tax (0%)</span>
-              <span>$0.00</span>
+              <span>Rs. 0.00</span>
             </div>
             <div style={{ height: '1px', background: 'var(--glass-border)' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 600 }}>Total</span>
               <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-                ${(total || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-dim)' }}>{(payment.currency || 'USD').toUpperCase()}</span>
+                Rs. {(total || 0).toFixed(2)} <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-dim)' }}>{currency}</span>
               </span>
             </div>
           </div>

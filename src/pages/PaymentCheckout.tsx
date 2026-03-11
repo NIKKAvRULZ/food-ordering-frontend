@@ -8,8 +8,10 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { useAuth } from '../context/AuthContext';
-import { createPayment } from '../services/paymentApi';
+import { createPayment, confirmPayment } from '../services/paymentApi';
+import { resolveOrderAmount } from '../types/payment';
 import type { OrderInfo } from '../types/payment';
+import { getUserOrders } from '../services/api';
 import axios from 'axios';
 
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -28,7 +30,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
@@ -38,28 +40,51 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
     const card = elements.getElement(CardElement);
     if (!card) return;
 
-    // 1. Create Stripe payment method
-    const { paymentMethod, error: stripeError } = await stripe.createPaymentMethod({
-      type: 'card',
-      card,
-    });
-
-    if (stripeError || !paymentMethod) {
-      setError(stripeError?.message || 'Card error. Please try again.');
-      setProcessing(false);
-      return;
-    }
-
     try {
-      // 2. Send to backend
-      const res = await createPayment({
+      // Step 1: Tokenise card → Stripe PaymentMethod
+      const { paymentMethod: pm, error: pmError } = await stripe.createPaymentMethod({
+        type: 'card',
+        card,
+      });
+
+      if (pmError || !pm) {
+        setError(pmError?.message || 'Invalid card details. Please try again.');
+        return;
+      }
+
+      // Step 2: Create payment record on backend (Stripe PaymentIntent created)
+      const amount = resolveOrderAmount(orderInfo);
+
+      const createRes = await createPayment({
         orderId,
         userId: user?.id?.toString() || orderInfo.userId,
-        amount: orderInfo.price * orderInfo.quantity,
-        currency: 'usd',
-        paymentMethodId: paymentMethod.id,
+        amount,
+        currency: (orderInfo.currency as any) || 'lkr',
+        paymentMethod: 'card',
+        description: `Payment for Order ${String(orderId).slice(-8).toUpperCase()}`,
       });
-      onSuccess(res.data._id);
+
+      const paymentId =
+        createRes.data?.data?.paymentId ||
+        (createRes.data as any)?._id ||
+        (createRes.data as any)?.data?._id;
+
+      if (!paymentId) {
+        setError('Could not initialise payment session. Please try again.');
+        return;
+      }
+
+      // Step 3: Confirm payment on backend — Stripe charges the card server-side
+      const confirmRes = await confirmPayment(paymentId, { paymentMethodId: pm.id });
+      const finalStatus =
+        confirmRes.data?.data?.status ||
+        (confirmRes.data as any)?.status;
+
+      if (finalStatus === 'succeeded' || finalStatus === 'completed') {
+        onSuccess(paymentId);
+      } else {
+        setError('Payment was declined. Please check your card details and try again.');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Payment failed. Please try again.');
     } finally {
@@ -100,7 +125,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>Total Amount</span>
           <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-            ${Number(orderInfo.price || (orderInfo as any).totalAmount || (orderInfo.price * orderInfo.quantity) || 0).toFixed(2)}
+            Rs. {resolveOrderAmount(orderInfo).toFixed(2)}
           </span>
         </div>
       </div>
@@ -143,7 +168,9 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
         disabled={processing || !stripe}
         style={{ padding: '15px', fontSize: '1rem', letterSpacing: '0.5px' }}
       >
-        {processing ? 'Processing Payment...' : `Pay $${((orderInfo.price || 0) * (orderInfo.quantity || 1)).toFixed(2)}`}
+        {processing
+          ? 'Processing Payment...'
+          : `Pay Rs. ${resolveOrderAmount(orderInfo).toFixed(2)}`}
       </button>
     </form>
   );
@@ -162,6 +189,18 @@ const PaymentCheckout: React.FC = () => {
   const [successPaymentId, setSuccessPaymentId] = useState('');
   const [fetchError, setFetchError] = useState('');
   const [fetching, setFetching] = useState(false);
+
+  // Pending orders for dropdown
+  const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+  useEffect(() => {
+    if (!user?.id) return;
+    getUserOrders(user.id.toString())
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        setPendingOrders(list.filter((o: any) => o.status === 'pending'));
+      })
+      .catch(() => {/* silently ignore — manual input still available */});
+  }, [user?.id]);
 
   // Auto-fetch when orderId comes from URL
   useEffect(() => {
@@ -186,12 +225,18 @@ const PaymentCheckout: React.FC = () => {
     }
   };
 
-  const handleOrderIdSubmit = (e: React.FormEvent) => {
+  const handleOrderIdSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (orderId.trim()) fetchOrder(orderId.trim());
   };
 
   const handleSuccess = (paymentId: string) => {
+    const paid: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+    const key = String(orderId);
+    if (key && !paid.includes(key)) {
+      paid.push(key);
+      localStorage.setItem('paidOrders', JSON.stringify(paid));
+    }
     setSuccessPaymentId(paymentId);
     setStep('success');
   };
@@ -244,19 +289,37 @@ const PaymentCheckout: React.FC = () => {
               Secure <span style={{ color: 'var(--accent-gold)' }}>Checkout</span>
             </h2>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '32px' }}>
-              Enter your Order ID to proceed with payment.
+              Select your pending order to proceed with payment.
             </p>
             <form onSubmit={handleOrderIdSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+              {/* Pending orders dropdown */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Order ID</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 683a2bf4c8d4e1a2b3c4d5e6"
+                <label htmlFor="pending-order-select" style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)' }}>Select Pending Order</label>
+                <select
+                  id="pending-order-select"
+                  aria-label="Select pending order"
                   value={orderId}
-                  onChange={(e) => setOrderId(e.target.value)}
+                  onChange={e => setOrderId(e.target.value)}
                   required
-                  style={{ width: '100%', boxSizing: 'border-box' }}
-                />
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--glass-border)',
+                    borderRadius: '12px',
+                    color: 'var(--text-main)',
+                    padding: '12px 14px',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="" style={{ background: '#0f172a' }}>— Choose a pending order —</option>
+                  {pendingOrders.map(o => {
+                    const oid = o.id || o._id || '';
+                    const label = `Order #${oid} — ${o.product || (o.items?.length ? `${o.items.length} items` : 'Order')} • Rs. ${Number(o.price || o.totalAmount || o.totalPrice || 0).toFixed(2)}`;
+                    return <option key={oid} value={oid} style={{ background: '#0f172a' }}>{label}</option>;
+                  })}
+                </select>
               </div>
               {fetchError && (
                 <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid #ef4444', color: '#ef4444', fontSize: '0.85rem' }}>

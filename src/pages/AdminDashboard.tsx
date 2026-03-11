@@ -233,12 +233,14 @@ const AdminDashboard: React.FC = () => {
           <h3 style={{ marginTop: 0, color: '#eab308' }}>{editForm.id ? 'Modify Parameters' : 'Synthesize New Component'}</h3>
           <form onSubmit={handleSaveMenu} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>NAME</label>
-              <input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
+              <label htmlFor="edit-item-name" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>NAME</label>
+              <input id="edit-item-name" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
             </div>
             <div>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>CATEGORY</label>
-              <select 
+              <label htmlFor="edit-item-category" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>CATEGORY</label>
+              <select
+                id="edit-item-category"
+                aria-label="Category"
                 value={editForm.categoryId} 
                 onChange={e => {
                   const selectedCat = categories.find(c => c.id === parseInt(e.target.value));
@@ -257,16 +259,16 @@ const AdminDashboard: React.FC = () => {
               </select>
             </div>
             <div>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>PRICE (LKR)</label>
-              <input type="number" value={editForm.price} onChange={e => setEditForm({...editForm, price: parseFloat(e.target.value)})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
+              <label htmlFor="edit-item-price" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>PRICE (LKR)</label>
+              <input id="edit-item-price" type="number" value={editForm.price} onChange={e => setEditForm({...editForm, price: parseFloat(e.target.value)})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
             </div>
             <div>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>IMAGE URL</label>
-              <input value={editForm.imageUrl} onChange={e => setEditForm({...editForm, imageUrl: e.target.value})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
+              <label htmlFor="edit-item-image" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>IMAGE URL</label>
+              <input id="edit-item-image" value={editForm.imageUrl} onChange={e => setEditForm({...editForm, imageUrl: e.target.value})} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '10px', width: '100%' }} />
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <label style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>SPECS / DESCRIPTION</label>
-              <textarea style={{ gridColumn: 'span 2', width: '100%', padding: '15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', minHeight: '100px' }} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
+              <label htmlFor="edit-item-description" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>SPECS / DESCRIPTION</label>
+              <textarea id="edit-item-description" style={{ gridColumn: 'span 2', width: '100%', padding: '15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', minHeight: '100px' }} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
             </div>
             <div style={{ gridColumn: 'span 2', display: 'flex', gap: '15px', justifyContent: 'flex-end', marginTop: '10px' }}>
               <button type="button" onClick={() => setEditForm(null)} className="btn-gold" style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>Discard Changes</button>

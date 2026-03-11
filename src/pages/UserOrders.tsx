@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../services/api';
 
@@ -40,19 +40,30 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
+interface Order {
+  id: number | string;
+  _id?: string;
+  status: string;
+  product: string;
+  quantity: number;
+  price?: number;
+  totalAmount?: number;
+  totalPrice?: number;
+}
+
 const UserPayments: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [page, setPage] = useState(1);
   const PER_PAGE = 8;
 
-  if (!user) return <Navigate to="/login" replace />;
-
   useEffect(() => {
+    if (!user?.id) return;
     const fetchOrders = async () => {
       setLoading(true);
       setError('');
@@ -62,8 +73,11 @@ const UserPayments: React.FC = () => {
 
         const list = Array.isArray(res.data) ? res.data : [];
 
-        // show only pending orders
-        const pendingOrders = list.filter((o: any) => o.status === 'pending');
+        // show only pending orders (excluding already-paid ones)
+        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        const pendingOrders = list.filter((o: Order) =>
+          o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+        );
 
         setOrders(pendingOrders);
       } catch {
@@ -73,8 +87,10 @@ const UserPayments: React.FC = () => {
       }
     };
 
-    if (user?.id) fetchOrders();
+    fetchOrders();
   }, [user?.id]);
+
+  if (!user) return <Navigate to="/login" replace />;
 
   const totalPages = Math.ceil(orders.length / PER_PAGE);
   const paginated = orders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -185,9 +201,18 @@ const UserPayments: React.FC = () => {
                 <StatusBadge status={o.status} />
 
                 {/* Price */}
-                <div style={{ fontWeight: 700 }}>
-                  ${Number(o.price || 0).toFixed(2)}
+                <div style={{ fontWeight: 700, minWidth: '90px', textAlign: 'right' }}>
+                  Rs. {Number(o.price || o.totalAmount || o.totalPrice || 0).toFixed(2)}
                 </div>
+
+                {/* Pay Now */}
+                <button
+                  className="btn-gold"
+                  onClick={() => navigate(`/payments/checkout/${o.id || o._id}`)}
+                  style={{ padding: '8px 20px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                >
+                  Pay Now
+                </button>
               </div>
             ))}
           </div>
