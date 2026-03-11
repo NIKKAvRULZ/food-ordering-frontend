@@ -110,7 +110,7 @@ const Profile: React.FC = () => {
                                 fontSize: '3rem', color: '#000', fontWeight: 900,
                                 boxShadow: '0 0 30px rgba(212, 175, 55, 0.2)'
                             }}>
-                                {user.username.charAt(0).toUpperCase()}
+                                {(user.username || 'U').charAt(0).toUpperCase()}
                             </div>
                             <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '24px', height: '24px', borderRadius: '50%', background: '#4ade80', border: '4px solid #1a1a1a', boxShadow: '0 0 10px #4ade80' }}></div>
                         </div>

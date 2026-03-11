@@ -10,6 +10,7 @@ const CartPanel: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [successData, setSuccessData] = useState<{show: boolean, orderId: string | null}>({show: false, orderId: null});
 
     const ORDER_URL = import.meta.env.VITE_ORDER_URL;
 
@@ -43,12 +44,21 @@ const CartPanel: React.FC = () => {
                 }))
             };
             
-            await axios.post(`${ORDER_URL}/orders`, orderPayload);
+            const response = await axios.post(`${ORDER_URL}/orders`, orderPayload);
+            const newOrderId = response.data?.orderId || response.data?.id;
+
+            // Trigger Pending Order Payment Email notification
+            if (newOrderId) {
+                 try {
+                     const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_URL;
+                     await axios.get(`${NOTIFICATION_URL}/api/v1/notify/order-pending/${user.id || user._id}/${newOrderId}`);
+                 } catch (notifErr) {
+                     console.error("Failed to queue email notification:", notifErr);
+                 }
+            }
 
             clearCart();
-            setCartOpen(false);
-            navigate('/home'); 
-            alert('Gourmet order synchronized successfully!');
+            setSuccessData({ show: true, orderId: newOrderId });
         } catch (err: any) {
             console.error("Order Failure Trace:", err);
             const serverMsg = err.response?.data?.message || err.response?.data;
@@ -60,6 +70,61 @@ const CartPanel: React.FC = () => {
 
 
     if (!isCartOpen) return null;
+
+    if (successData.show) {
+        return (
+            <div style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 3000,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: 'rgba(0,0,0,0.8)',
+                backdropFilter: 'blur(10px)',
+                animation: 'fadeIn 0.3s ease-out'
+            }}>
+                <style>{`
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: scale(0.95); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                `}</style>
+                <div className="glass-panel" style={{ padding: '50px', maxWidth: '400px', textAlign: 'center', border: '1px solid var(--accent-gold)' }}>
+                    <div style={{
+                        width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto 20px',
+                        background: 'rgba(16, 185, 129, 0.1)', border: '2px solid #10b981',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem'
+                    }}>✓</div>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 10px 0' }}>Order <span style={{ color: 'var(--accent-gold)' }}>Secured</span></h2>
+                    <p style={{ color: 'var(--text-dim)', marginBottom: '30px', lineHeight: 1.6 }}>
+                        Your culinary request has been synchronized with the mainframe. Check your secure email vector for details.
+                    </p>
+                    <button 
+                        className="btn-gold" 
+                        onClick={() => {
+                            setCartOpen(false);
+                            setSuccessData({ show: false, orderId: null });
+                            if (successData.orderId) navigate(`/payments/checkout/${successData.orderId}`);
+                            else navigate('/payments');
+                        }}
+                        style={{ width: '100%', padding: '15px' }}
+                    >
+                        Secure Payment Terminals →
+                    </button>
+                    <button 
+                         onClick={() => {
+                            setCartOpen(false);
+                            setSuccessData({ show: false, orderId: null });
+                         }}
+                         style={{ background: 'none', border: 'none', color: 'var(--text-dim)', marginTop: '20px', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{
