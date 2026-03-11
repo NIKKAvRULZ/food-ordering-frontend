@@ -197,9 +197,14 @@ const PaymentCheckout: React.FC = () => {
     getUserOrders(user.id.toString())
       .then(res => {
         const list = Array.isArray(res.data) ? res.data : [];
-        setPendingOrders(list.filter((o: any) => o.status === 'pending'));
+        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        setPendingOrders(
+          list.filter((o: any) =>
+            o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+          )
+        );
       })
-      .catch(() => {/* silently ignore — manual input still available */});
+      .catch(() => {/* silently ignore */});
   }, [user?.id]);
 
   // Auto-fetch when orderId comes from URL
@@ -237,6 +242,8 @@ const PaymentCheckout: React.FC = () => {
       paid.push(key);
       localStorage.setItem('paidOrders', JSON.stringify(paid));
     }
+    // Remove paid order from dropdown immediately
+    setPendingOrders(prev => prev.filter(o => String(o.id || o._id) !== key));
     setSuccessPaymentId(paymentId);
     setStep('success');
   };
