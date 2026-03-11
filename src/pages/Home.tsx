@@ -72,7 +72,7 @@ const Home: React.FC = () => {
           </p>
           <div style={{ display: 'flex', gap: '15px' }}>
             <Link to="/menu" className="btn-gold" style={{ padding: '12px 35px', textDecoration: 'none' }}>Explore Menu</Link>
-            <Link to="/payments" style={{ padding: '12px 35px', borderRadius: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', textDecoration: 'none', border: '1px solid var(--glass-border)', fontWeight: 600 }}>My Orders</Link>
+            <Link to="/orders" style={{ padding: '12px 35px', borderRadius: '100px', background: 'rgba(255,255,255,0.05)', color: '#fff', textDecoration: 'none', border: '1px solid var(--glass-border)', fontWeight: 600 }}>My Orders</Link>
           </div>
         </div>
       </div>

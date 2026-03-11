@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import PaymentCheckout from './pages/PaymentCheckout';
+import UserOrders from "./pages/UserOrders";
 import UserPayments from './pages/UserPayments';
 import PaymentDetail from './pages/PaymentDetail';
 import PaymentInvoice from './pages/PaymentInvoice';
@@ -49,6 +50,7 @@ const App: React.FC = () => {
                                 <Route path="/payments/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
                                 <Route path="/payments/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
                                 <Route path="/payments" element={<PrivateRoute><UserPayments /></PrivateRoute>} />
+                                <Route path="/orders" element={<PrivateRoute><UserOrders /></PrivateRoute>} />
                                 <Route path="/payments/:id" element={<PrivateRoute><PaymentDetail /></PrivateRoute>} />
                                 <Route path="/payments/:id/invoice" element={<PrivateRoute><PaymentInvoice /></PrivateRoute>} />
                                 

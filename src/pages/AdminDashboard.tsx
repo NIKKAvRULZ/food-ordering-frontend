@@ -144,12 +144,11 @@ const AdminDashboard: React.FC = () => {
         );
 
       case 'orders':
-        return renderTable(['Order ID', 'Items', 'Amount', 'Status', 'Date', 'Actions'], data.map(order => [
+        return renderTable(['Order ID', 'Items', 'Amount', 'Status',  'Actions'], data.map(order => [
           String(order.id).substring(0, 8),
-          order.items?.length || 0,
-          `LKR ${order.totalAmount?.toFixed(2)}`,
+          order.product || 0,
+          `LKR ${order.price?.toFixed(2)}`,
           <span style={{ color: order.status === 'COMPLETED' ? '#4ade80' : '#fbbf24' }}>{order.status}</span>,
-          new Date(order.orderDate).toLocaleDateString(),
           <button onClick={() => handleDelete(order.id)} style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: 'none', padding: '5px 12px', borderRadius: '6px' }}>Cancel</button>
         ]));
 
