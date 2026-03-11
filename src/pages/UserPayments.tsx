@@ -142,7 +142,7 @@ const UserPayments: React.FC = () => {
           { label: 'Total Payments', value: payments.length, color: 'var(--accent-gold)' },
           { label: 'Succeeded', value: payments.filter(p => isSuccess(p.status)).length, color: '#10b981' },
           { label: 'Pending Orders', value: pendingOrders.length, color: '#fbbf24' },
-          { label: 'Total Spent', value: `$${(totalSpent || 0).toFixed(2)}`, color: 'var(--accent-gold)' },
+          { label: 'Total Spent', value: `Rs. ${(totalSpent || 0).toFixed(2)}`, color: 'var(--accent-gold)' },
         ].map((stat) => (
           <div key={stat.label} className="glass-panel" style={{ padding: '20px 24px', borderRadius: '18px' }}>
             <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '8px' }}>{stat.label}</div>
