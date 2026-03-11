@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../services/api';
+import { getPaymentsByUser } from '../services/paymentApi';
 
 const STATUS_COLOR: Record<string, { bg: string; color: string; label: string }> = {
   pending: { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24', label: 'PENDING' },
@@ -69,14 +70,31 @@ const UserPayments: React.FC = () => {
       setError('');
 
       try {
-        const res = await getUserOrders(user.id?.toString() || '');
+        const [ordersRes, paymentsRes] = await Promise.all([
+          getUserOrders(user.id?.toString() || ''),
+          getPaymentsByUser(user.id?.toString() || ''),
+        ]);
 
-        const list = Array.isArray(res.data) ? res.data : [];
+        const list = Array.isArray(ordersRes.data) ? ordersRes.data : [];
 
-        // show only pending orders (excluding already-paid ones)
-        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        const raw = (paymentsRes.data as any);
+        const allPayments: any[] =
+          Array.isArray(raw) ? raw :
+          Array.isArray(raw?.data?.payments) ? raw.data.payments :
+          Array.isArray(raw?.data) ? raw.data : [];
+
+        const paidOrderIds = new Set(
+          allPayments
+            .filter((p: any) => p.status === 'succeeded' || p.status === 'completed')
+            .map((p: any) => String(p.orderId))
+        );
+
+        const lsPaid: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        lsPaid.forEach(id => paidOrderIds.add(id));
+        localStorage.setItem('paidOrders', JSON.stringify([...paidOrderIds]));
+
         const pendingOrders = list.filter((o: Order) =>
-          o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+          o.status === 'pending' && !paidOrderIds.has(String(o.id || o._id))
         );
 
         setOrders(pendingOrders);

@@ -12,6 +12,7 @@ import { createPayment, confirmPayment } from '../services/paymentApi';
 import { resolveOrderAmount } from '../types/payment';
 import type { OrderInfo } from '../types/payment';
 import { getUserOrders } from '../services/api';
+import { getPaymentsByUser } from '../services/paymentApi';
 import axios from 'axios';
 
 const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -194,17 +195,45 @@ const PaymentCheckout: React.FC = () => {
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   useEffect(() => {
     if (!user?.id) return;
-    getUserOrders(user.id.toString())
-      .then(res => {
-        const list = Array.isArray(res.data) ? res.data : [];
-        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+    const loadPendingOrders = async () => {
+      try {
+        const [ordersRes, paymentsRes] = await Promise.all([
+          getUserOrders(user.id.toString()),
+          getPaymentsByUser(user.id.toString()),
+        ]);
+
+        const allOrders: any[] = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+
+        // Collect orderIds that already have a succeeded/completed payment
+        const raw = (paymentsRes.data as any);
+        const allPayments: any[] =
+          Array.isArray(raw) ? raw :
+          Array.isArray(raw?.data?.payments) ? raw.data.payments :
+          Array.isArray(raw?.data) ? raw.data : [];
+
+        const paidOrderIds = new Set(
+          allPayments
+            .filter((p: any) => p.status === 'succeeded' || p.status === 'completed')
+            .map((p: any) => String(p.orderId))
+        );
+
+        // Also include localStorage entries (for current session before page reload)
+        const lsPaid: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        lsPaid.forEach(id => paidOrderIds.add(id));
+
+        // Sync localStorage with what we know from the server
+        localStorage.setItem('paidOrders', JSON.stringify([...paidOrderIds]));
+
         setPendingOrders(
-          list.filter((o: any) =>
-            o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+          allOrders.filter((o: any) =>
+            o.status === 'pending' && !paidOrderIds.has(String(o.id || o._id))
           )
         );
-      })
-      .catch(() => {/* silently ignore */});
+      } catch {
+        // silently ignore
+      }
+    };
+    loadPendingOrders();
   }, [user?.id]);
 
   // Auto-fetch when orderId comes from URL

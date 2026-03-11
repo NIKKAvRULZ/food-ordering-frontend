@@ -79,12 +79,32 @@ const UserPayments: React.FC = () => {
     if (!user?.id) return;
     const fetchPendingOrders = async () => {
       try {
-        const res = await getUserOrders(user.id?.toString() || '');
-        const list = Array.isArray(res.data) ? res.data : [];
-        const paidIds: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        const [ordersRes, paymentsRes] = await Promise.all([
+          getUserOrders(user.id?.toString() || ''),
+          getPaymentsByUser(user.id?.toString() || ''),
+        ]);
+
+        const list = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+
+        const raw = (paymentsRes.data as any);
+        const allPayments: any[] =
+          Array.isArray(raw) ? raw :
+          Array.isArray(raw?.data?.payments) ? raw.data.payments :
+          Array.isArray(raw?.data) ? raw.data : [];
+
+        const paidOrderIds = new Set(
+          allPayments
+            .filter((p: any) => p.status === 'succeeded' || p.status === 'completed')
+            .map((p: any) => String(p.orderId))
+        );
+
+        const lsPaid: string[] = JSON.parse(localStorage.getItem('paidOrders') || '[]');
+        lsPaid.forEach(id => paidOrderIds.add(id));
+        localStorage.setItem('paidOrders', JSON.stringify([...paidOrderIds]));
+
         setPendingOrders(
           list.filter((o: PendingOrder) =>
-            o.status === 'pending' && !paidIds.includes(String(o.id || o._id))
+            o.status === 'pending' && !paidOrderIds.has(String(o.id || o._id))
           )
         );
       } catch {
