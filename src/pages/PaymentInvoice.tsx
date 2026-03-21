@@ -59,7 +59,7 @@ const PaymentInvoice: React.FC = () => {
   const invoiceDate = rawDate ? new Date(rawDate) : new Date();
   const paymentId = payment._id || (payment as any).paymentId || (payment as any).id || '';
   const invoiceNumber = `INV-${invoiceDate.getFullYear()}${String(invoiceDate.getMonth() + 1).padStart(2, '0')}-${String(paymentId || 'N/A').slice(-6).toUpperCase()}`;
-  const currency = ((payment as any).currency || 'LKR').toUpperCase();
+  const currency = 'LKR';
 
   return (
     <div style={{ padding: '20px 8%' }}>

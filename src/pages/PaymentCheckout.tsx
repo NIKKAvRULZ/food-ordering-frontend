@@ -61,7 +61,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
         orderId,
         userId: user?.id?.toString() || user?._id?.toString() || orderInfo.userId,
         amount,
-        currency: (orderInfo.currency as any) || 'lkr',
+        currency: 'lkr',
         paymentMethod: 'card',
         description: `Payment for Order ${String(orderId).slice(-8).toUpperCase()}`,
       });
@@ -278,6 +278,12 @@ const PaymentCheckout: React.FC = () => {
     }
     // Remove paid order from dropdown immediately
     setPendingOrders(prev => prev.filter(o => String(o.id || o._id) !== key));
+    // Trigger notification email (async)
+    if (user?.id || user?._id) {
+        const uid = (user?.id || user?._id).toString();
+        import('../services/api').then(m => m.triggerReceiptEmail(uid, key)).catch(console.error);
+    }
+
     setSuccessPaymentId(paymentId);
     setStep('success');
   };
@@ -420,6 +426,7 @@ const PaymentCheckout: React.FC = () => {
             <p style={{ color: 'var(--text-dim)', marginBottom: '32px', fontSize: '0.9rem' }}>
               Your transaction has been processed successfully.
             </p>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>LKR</div>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '32px' }}>
               Payment ID: <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{successPaymentId}</span>
             </p>

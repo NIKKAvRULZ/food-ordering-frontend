@@ -151,7 +151,7 @@ const PaymentDetail: React.FC = () => {
           <div style={{ fontSize: '3rem', fontWeight: 700, color: 'var(--accent-gold)', lineHeight: 1 }}>
             Rs. {Number(payment.amount || 0).toFixed(2)}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>{payment.currency || 'LKR'}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase' }}>LKR</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '4px' }}>Date</div>
@@ -188,7 +188,7 @@ const PaymentDetail: React.FC = () => {
               { label: 'Payment ID', value: payment._id || (payment as any).id || 'N/A' },
               { label: 'Order ID', value: payment.orderId },
               { label: 'User ID', value: payment.userId },
-              { label: 'Currency', value: (payment.currency || 'LKR').toUpperCase() },
+              { label: 'Currency', value: 'LKR' },
               { label: 'Stripe Intent ID', value: payment.stripePaymentIntentId || '—' },
               { label: 'Payment Method ID', value: payment.stripePaymentMethodId || '—' },
               ...(payment.refundId ? [

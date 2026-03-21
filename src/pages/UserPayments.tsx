@@ -265,7 +265,7 @@ const UserPayments: React.FC = () => {
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: p.status === 'refunded' ? '#94a3b8' : 'var(--text-main)' }}>
                     {p.status === 'refunded' ? '-' : ''}Rs. {(p.amount || 0).toFixed(2)}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{p.currency || 'LKR'}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>LKR</div>
                 </div>
 
                 {/* Arrow */}
