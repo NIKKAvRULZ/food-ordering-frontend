@@ -319,11 +319,29 @@ const MenuCatalog: React.FC = () => {
                                     <span style={{ fontSize: '0.65rem', background: 'rgba(251, 146, 60, 0.1)', color: 'var(--accent-gold)', padding: '5px 12px', borderRadius: '100px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
                                         {item.categoryName || categoriesMap[item.categoryId] || 'General'}
                                     </span>
-                                    {item.vegan && (
-                                        <span style={{ fontSize: '0.65rem', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '5px 12px', borderRadius: '100px', fontWeight: 800 }}>
-                                            VEGAN
-                                        </span>
-                                    )}
+                                    {item.vegan ? (
+  <span style={{
+    fontSize: '0.65rem',
+    background: 'rgba(34, 197, 94, 0.1)',
+    color: '#22c55e',
+    padding: '5px 12px',
+    borderRadius: '100px',
+    fontWeight: 800
+  }}>
+    🌱 VEGAN
+  </span>
+) : (
+  <span style={{
+    fontSize: '0.65rem',
+    background: 'rgba(239, 68, 68, 0.1)',
+    color: '#ef4444',
+    padding: '5px 12px',
+    borderRadius: '100px',
+    fontWeight: 800
+  }}>
+    🔴 NON-VEGAN
+  </span>
+)}
                                 </div>
                                 <div className={`status-dot ${item.isAvailable ? 'live' : 'offline'}`} />
                             </div>
