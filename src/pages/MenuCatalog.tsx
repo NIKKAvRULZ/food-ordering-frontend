@@ -73,7 +73,7 @@ const MenuCatalog: React.FC = () => {
                         ease: 'back.out(1.7)', 
                         delay: 0.3,
                         onComplete: function() {
-                            gsap.set(this.targets(), { clearProps: 'all' });
+                            gsap.set(this.targets(), { clearProps: 'scale,opacity' });
                         }
                     }
                 );
