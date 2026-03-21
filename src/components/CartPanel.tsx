@@ -28,22 +28,27 @@ const CartPanel: React.FC = () => {
         try {
             // Consolidate into a single order as per modern system requirements
             const orderPayload = {
-                userId: user.id || user._id,
+                userId: String(user.id || user._id),
                 status: 'pending',
+                address: user.deliveryAddress || "Standard Delivery",
                 totalAmount: cartTotal,
+                totalPrice: cartTotal, // Fallback
                 // Legacy support fields
                 product: cartItems.length > 1 ? `${cartItems[0].name} + ${cartItems.length - 1} items` : cartItems[0].name,
                 quantity: cartItems.reduce((acc, i) => acc + i.quantity, 0),
                 price: cartTotal,
                 // Modern structured items
                 items: cartItems.map(item => ({
-                    menuItemId: item.id,
+                    menuItemId: String(item.id),
+                    productId: String(item.id), // Fallback alias
+                    product: item.name,         // Crucial field for some teammate services
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price
                 }))
             };
             
+            console.log("Placing Order with payload:", orderPayload);
             const response = await axios.post(`${ORDER_URL}/orders`, orderPayload);
             const newOrderId = response.data?.orderId || response.data?.id;
 
@@ -62,7 +67,11 @@ const CartPanel: React.FC = () => {
         } catch (err: any) {
             console.error("Order Failure Trace:", err);
             const serverMsg = err.response?.data?.message || err.response?.data;
-            setError(serverMsg || 'Failed to place order. Connection interference.');
+            if (err.response?.status === 500) {
+                setError('Order Server Critical Failure (500). Please check network synchronization.');
+            } else {
+                setError(serverMsg || 'Failed to place order. Connection interference.');
+            }
         } finally {
             setLoading(false);
         }
