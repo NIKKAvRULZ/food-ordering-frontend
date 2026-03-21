@@ -86,8 +86,7 @@ const Profile: React.FC = () => {
     }
 
     return (
-        <div style={{ 
-            padding: '40px 8%',
+        <div className="profile-container" style={{ 
             maxWidth: '1400px',
             margin: '0 auto',
             minHeight: '100vh',
@@ -97,7 +96,7 @@ const Profile: React.FC = () => {
             <div style={{ position: 'fixed', top: '20%', left: '10%', width: '400px', height: '400px', background: 'var(--accent-gold)', filter: 'blur(150px)', opacity: 0.03, borderRadius: '50%', pointerEvents: 'none' }}></div>
             <div style={{ position: 'fixed', bottom: '20%', right: '10%', width: '300px', height: '300px', background: 'var(--accent-secondary)', filter: 'blur(120px)', opacity: 0.03, borderRadius: '50%', pointerEvents: 'none' }}></div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '40px', position: 'relative', zIndex: 1 }}>
+            <div className="profile-layout-grid" style={{ position: 'relative', zIndex: 1 }}>
                 
                 {/* LEFT SIDEBAR: IDENTITY CARD */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
@@ -163,8 +162,9 @@ const Profile: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                     
                     {/* NAV TABS */}
-                    <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '18px', width: 'fit-content', border: '1px solid var(--glass-border)' }}>
+                    <div className="profile-tabs-container" style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.03)', padding: '8px', borderRadius: '18px', border: '1px solid var(--glass-border)' }}>
                         <button 
+                            className="profile-tab-btn"
                             onClick={() => setActiveTab('details')}
                             style={{ 
                                 padding: '12px 30px', borderRadius: '14px', border: 'none', 
@@ -189,11 +189,11 @@ const Profile: React.FC = () => {
                     </div>
 
                     {/* MAIN PANEL */}
-                    <div className="glass-panel fade-in" style={{ padding: '50px', flex: 1 }}>
+                    <div className="glass-panel fade-in profile-main-panel" style={{ flex: 1 }}>
                         
                         {activeTab === 'details' ? (
                             <>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                                <div className="profile-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                                     <div>
                                         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Identity <span style={{ color: 'var(--accent-gold)' }}>Configuration</span></h3>
                                         <p style={{ color: 'var(--text-dim)', margin: '5px 0 0 0' }}>Manage your account parameters and communication vectors.</p>
@@ -207,7 +207,7 @@ const Profile: React.FC = () => {
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px' }}>
+                                <div className="profile-details-grid">
                                     {isEditing ? (
                                         <>
                                             <div className="form-group" style={{ gridColumn: 'span 2' }}>
@@ -292,7 +292,7 @@ const Profile: React.FC = () => {
                             </>
                         ) : (
                             <>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                                <div className="profile-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                                     <div>
                                         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Transaction <span style={{ color: 'var(--accent-gold)' }}>Ledger</span></h3>
                                         <p style={{ color: 'var(--text-dim)', margin: '5px 0 0 0' }}>Synchronized log of all architectural service requests.</p>
@@ -330,11 +330,7 @@ const Profile: React.FC = () => {
                                             else if (status === 'CANCELLED') statusColor = '#f87171';
 
                                             return (
-                                                <div key={idx} className="glass-panel" style={{ 
-                                                    padding: '25px 35px', 
-                                                    display: 'flex', 
-                                                    justifyContent: 'space-between', 
-                                                    alignItems: 'center',
+                                                <div key={idx} className="glass-panel profile-order-card" style={{ 
                                                     borderLeft: `5px solid ${statusColor}`,
                                                     transition: '0.3s'
                                                 }}>
@@ -371,6 +367,71 @@ const Profile: React.FC = () => {
                     </div>
                 </div>
             </div>
+            <style>{`
+                .profile-container {
+                    padding: 40px 8%;
+                }
+                .profile-tabs-container {
+                    width: fit-content;
+                }
+                .profile-main-panel {
+                    padding: 50px;
+                }
+                .profile-layout-grid {
+                    display: grid;
+                    grid-template-columns: 350px 1fr;
+                    gap: 40px;
+                }
+                .profile-details-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 40px;
+                }
+                .profile-order-card {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 25px 35px;
+                }
+                
+                @media (max-width: 992px) {
+                    .profile-layout-grid {
+                        grid-template-columns: 1fr;
+                        gap: 30px;
+                    }
+                }
+                
+                @media (max-width: 768px) {
+                    .profile-container {
+                        padding: 20px 5%;
+                    }
+                    .profile-main-panel {
+                        padding: 25px;
+                    }
+                    .profile-details-grid {
+                        grid-template-columns: 1fr;
+                        gap: 20px;
+                    }
+                    .profile-panel-header {
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        gap: 20px;
+                    }
+                    .profile-order-card {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 20px !important;
+                        gap: 15px;
+                    }
+                    .profile-tabs-container {
+                        flex-direction: column;
+                        width: 100% !important;
+                    }
+                    .profile-tab-btn {
+                        width: 100%;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

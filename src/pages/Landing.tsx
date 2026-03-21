@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getMenuItems } from '../services/api';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,6 +12,18 @@ if (typeof window !== 'undefined') {
 
 const Landing: React.FC = () => {
     const { statuses } = useAuth();
+    const [featuredItems, setFeaturedItems] = useState<any[]>([]);
+
+    useEffect(() => {
+        getMenuItems().then(res => {
+            if (res.data?.success && Array.isArray(res.data.data)) {
+                const shuffled = [...res.data.data].sort(() => 0.5 - Math.random());
+                // Duplicate for smooth infinite marquee scrolling
+                setFeaturedItems([...shuffled.slice(0, 6), ...shuffled.slice(0, 6)]);
+            }
+        }).catch(err => console.error("Could not fetch elements", err));
+    }, []);
+
     const heroContentRef = useRef<HTMLDivElement>(null);
     const burgerRef = useRef<HTMLDivElement>(null);
     const sushiRef = useRef<HTMLDivElement>(null);
@@ -221,20 +234,44 @@ const Landing: React.FC = () => {
                 </div>
             </section>
 
-            {/* 5. APP PROMO */}
-            <section className="app-promo-section">
-                <div className="glass-panel promo-card">
-                    <div className="promo-text">
-                        <h2>Gourmet <span className="text-gold">Mobile</span></h2>
-                        <p>Take the power of digital gastronomy with you. Optimized for low-power handheld nodes.</p>
-                        <div className="app-buttons">
-                            <button className="app-btn">App Store</button>
-                            <button className="app-btn">Play Store</button>
+            {/* 5. LIVE MENU CAROUSEL */}
+            <section className="featured-menu-section">
+                <div className="marquee-container">
+                    <div className="marquee-track">
+                        {featuredItems.map((item, idx) => (
+                            <Link to="/menu" key={`feat-${idx}`} style={{textDecoration: 'none'}} className="glass-panel marquee-card">
+                                <img src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&h=300&fit=crop'} alt={item.name} className="marquee-img" />
+                                <div className="marquee-info">
+                                    <h4 style={{color: '#fff'}}>{item.name}</h4>
+                                    <p className="text-gold">LKR {Number(item.price).toLocaleString()}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* 6. OPERATIVE FEEDBACK */}
+            <section className="reviews-section">
+                <div className="section-header-centered">
+                    <div className="mini-badge">TELEMETRY</div>
+                    <h2 className="section-title-lg">Node <span className="text-gold">Feedback</span></h2>
+                </div>
+                <div className="reviews-grid">
+                    {[
+                        { name: "Agent K.", role: "Lead Architect", quote: "The latency is zero and the flavor is absolute. I haven't cooked in months." },
+                        { name: "Dr. Vance", role: "Nutrition Specialist", quote: "Perfectly optimized protein synthesis delivered through an encrypted pipeline." },
+                        { name: "S. Reynolds", role: "Logistics", quote: "The UI matches the premium taste of the Wagyu. Flawless execution." }
+                    ].map((review, idx) => (
+                        <div key={idx} className="glass-panel review-card" style={{padding: '30px'}}>
+                            <div style={{color: 'var(--accent-gold)', marginBottom: '15px'}} className="stars">★★★★★</div>
+                            <p className="review-quote">"{review.quote}"</p>
+                            <div className="review-author" style={{display: 'flex', flexDirection: 'column', marginTop: '20px', borderTop: '1px solid var(--glass-border)', paddingTop: '15px'}}>
+                                <strong style={{color: '#fff', fontWeight: 800}}>{review.name}</strong>
+                                <span style={{fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '1px', textTransform: 'uppercase'}}>{review.role}</span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="promo-img">
-                         <div className="mockup-frame"></div>
-                    </div>
+                    ))}
                 </div>
             </section>
 
@@ -345,16 +382,27 @@ const Landing: React.FC = () => {
                 .visual-header { font-size: 1rem; font-weight: 800; margin-bottom: 30px; text-align: center; color: var(--accent-gold); }
                 .status-bars { display: flex; flex-direction: column; gap: 15px; }
 
-                /* App Promo */
-                .app-promo-section { padding: 120px 8vw; }
-                .promo-card { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; border-radius: 60px; }
-                .promo-text h2 { font-size: 3.5rem; margin-bottom: 20px; }
-                .promo-text p { color: var(--text-dim); margin-bottom: 40px; font-size: 1.2rem; }
-                .app-buttons { display: flex; gap: 20px; }
-                .app-btn { background: #fff; color: #000; border: none; padding: 14px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-                .app-btn:hover { transform: scale(1.05); }
-                .promo-img { position: relative; height: 400px; }
-                .mockup-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 400px; background: rgba(255,255,255,0.02); border: 4px solid var(--glass-border); border-radius: 40px; }
+                /* Dynamic Marquee */
+                .featured-menu-section { padding: 40px 0 120px; overflow: hidden; width: 100vw; position: relative; margin-left: calc(-50vw + 50%); }
+                .marquee-container { position: relative; width: 100%; display: flex; overflow: hidden; padding: 20px 0; }
+                .marquee-container::before, .marquee-container::after { content: ''; position: absolute; top: 0; bottom: 0; width: 15vw; z-index: 2; pointer-events: none; }
+                .marquee-container::before { left: 0; background: linear-gradient(to right, #010409, transparent); }
+                .marquee-container::after { right: 0; background: linear-gradient(to left, #010409, transparent); }
+                .marquee-track { display: flex; gap: 40px; width: max-content; animation: scroll-marquee 50s linear infinite; }
+                .marquee-track:hover { animation-play-state: paused; }
+                .marquee-card { width: 320px; flex-shrink: 0; padding: 15px !important; display: flex; align-items: center; gap: 20px; border-radius: 20px; background: rgba(255,255,255,0.02); transition: 0.3s; cursor: pointer; text-decoration: none; }
+                .marquee-card:hover { transform: translateY(-5px); border-color: var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+                .marquee-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; }
+                .marquee-info h4 { margin: 0 0 5px; font-size: 1.1rem; }
+                .marquee-info p { margin: 0; font-weight: 800; font-size: 0.9rem; }
+                @keyframes scroll-marquee { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 20px)); } }
+
+                /* Reviews Section */
+                .reviews-section { padding: 0 8vw 120px; max-width: 1400px; margin: 0 auto; }
+                .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+                .review-card { transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+                .review-card:hover { transform: translateY(-10px) rotate(1deg); box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-color: rgba(251, 146, 60, 0.3); }
+                .review-quote { font-size: 1.1rem; line-height: 1.6; color: var(--text-main); font-style: italic; font-weight: 300; }
 
                 /* Final CTA */
                 .cta-final { padding: 180px 8vw; text-align: center; position: relative; }
