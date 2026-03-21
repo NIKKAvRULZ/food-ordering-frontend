@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getMenuItems, getCategories, getPersonalizedMenu } from '../services/api';
+import { getMenuItems, getCategories } from '../services/api';
 import { useCart } from '../context/CartContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -15,9 +15,6 @@ const MenuCatalog: React.FC = () => {
     const [categoryFilter, setCategoryFilter] = useState<string>('All');
     const [categoriesMap, setCategoriesMap] = useState<Record<number, string>>({});
     const [dietaryFilter, setDietaryFilter] = useState<'All' | 'Vegan' | 'Non-Vegan'>('All');
-    const [userIdInput, setUserIdInput] = useState('');
-    const [personalizedMode, setPersonalizedMode] = useState(false);
-    const [personalizedDetected, setPersonalizedDetected] = useState<boolean | null>(null);
 
     const catalogRef = useRef<HTMLDivElement>(null);
 
@@ -37,33 +34,8 @@ const MenuCatalog: React.FC = () => {
             if (itemsRes.data && itemsRes.data.success && Array.isArray(itemsRes.data.data)) {
                 setMenuItems(itemsRes.data.data);
             }
-
-            setPersonalizedMode(false);
-            setPersonalizedDetected(null);
         } catch (err) {
             console.error("Failed to fetch menu data", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadPersonalizedMenu = async () => {
-        if (!userIdInput.trim()) {
-            alert('Please enter a user ID first.');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const res = await getPersonalizedMenu(userIdInput.trim());
-            if (res.data?.success) {
-                setMenuItems(res.data.data || []);
-                setPersonalizedMode(true);
-                setPersonalizedDetected(res.data.detectedVeganPreference);
-            }
-        } catch (err) {
-            console.error("Failed to fetch personalized menu", err);
-            alert('Could not load personalized menu. Please check the user ID.');
         } finally {
             setLoading(false);
         }
@@ -180,45 +152,7 @@ const MenuCatalog: React.FC = () => {
                 </p>
             </div>
 
-            {/* <div className="glass-panel" style={{ marginBottom: '30px', padding: '24px' }}>
-                <h3 style={{ marginTop: 0, color: 'var(--accent-gold)' }}>Personalized Menu</h3>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        value={userIdInput}
-                        onChange={(e) => setUserIdInput(e.target.value)}
-                        placeholder="Enter user ID"
-                        style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            color: '#fff',
-                            border: '1px solid var(--glass-border)',
-                            padding: '12px',
-                            borderRadius: '10px',
-                            minWidth: '320px'
-                        }}
-                    />
-                    <button className="btn-gold" onClick={loadPersonalizedMenu}>
-                        Load Personalized Menu
-                    </button>
-                    <button
-                        className="btn-gold"
-                        style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff' }}
-                        onClick={loadNormalMenu}
-                    >
-                        Reset
-                    </button>
-                </div>
 
-                {personalizedMode && (
-                    <p style={{ marginTop: '14px', color: 'var(--text-dim)' }}>
-                        Personalized mode active —
-                        detected preference:{" "}
-                        <strong style={{ color: personalizedDetected ? '#22c55e' : '#f97316' }}>
-                            {personalizedDetected ? 'Vegan' : 'Non-Vegan'}
-                        </strong>
-                    </p>
-                )}
-            </div> */}
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginBottom: '60px' }}>
                 <div style={{
