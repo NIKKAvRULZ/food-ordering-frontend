@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { getMenuItems, getUserOrders } from '../services/api';
+import { getPersonalizedMenu, getUserOrders } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import gsap from 'gsap';
 
@@ -14,18 +14,13 @@ const Home: React.FC = () => {
         if (user) {
             // Fetch Catalog Items
             if (statuses.catalog === 'live') {
-                getMenuItems()
+                getPersonalizedMenu(user.id)
                     .then(res => {
                         if (res.data && res.data.success && Array.isArray(res.data.data)) {
-                            let processedItems: any[] = res.data.data;
-                            if (user?.vegan) {
-                                processedItems = processedItems.filter((i: any) => i.vegan === true);
-                            }
-                            processedItems = processedItems.filter((i: any) => i.isAvailable !== false);
-                            setMenuItems(processedItems.slice(0, 4));
+                            setMenuItems(res.data.data.slice(0, 4)); // Only show top 4 on dashboard
                         }
                     })
-                    .catch(err => console.error("Failed to fetch menu items", err));
+                    .catch(err => console.error("Failed to fetch personalized menu items", err));
             }
 
             // Fetch Real Order Count
@@ -130,7 +125,7 @@ const Home: React.FC = () => {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                             <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.5rem' }}>
-                                {statuses.catalog === 'live' ? (user?.vegan ? '🌱 Curated Vegan Picks' : '🔥 Chef\'s Specials') : '⚠️ System Offline'}
+                                {statuses.catalog === 'live' ? '🤖 Smart AI Recommendations' : '⚠️ System Offline'}
                             </h3>
                             <Link to="/menu" style={{ color: 'var(--accent-gold)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 600 }}>See All →</Link>
                         </div>

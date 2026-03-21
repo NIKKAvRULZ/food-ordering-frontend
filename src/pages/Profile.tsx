@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUserProfile, getUserOrders, updateUserProfile } from '../services/api';
+import { getUserProfile, getUserOrders, updateUserProfile, getPersonalizedMenu } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import type { User } from '../types/user';
 
 const Profile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { logout } = useAuth(); // Access logout from context
+    const { addToCart } = useCart(); // Access cart to allow purchasing from Hub
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
     const [actualOrders, setActualOrders] = useState<any>(null); // Real Orders
+    const [recommendations, setRecommendations] = useState<any[]>([]); // AI Data
     const [loading, setLoading] = useState(true);
 
     const [isEditing, setIsEditing] = useState(false);
@@ -19,12 +22,14 @@ const Profile: React.FC = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const [profileRes, orderRes] = await Promise.all([
+                const [profileRes, orderRes, recsRes] = await Promise.all([
                     getUserProfile(id || ""),
-                    getUserOrders(id || "")
+                    getUserOrders(id || ""),
+                    getPersonalizedMenu(id || "").catch(() => ({ data: { data: [] } }))
                 ]);
                 setUser(profileRes.data);
                 setActualOrders(orderRes.data);
+                setRecommendations(recsRes.data?.data || []);
             } catch (err) {
                 console.error("Profile fetch failed", err);
             } finally {
@@ -61,7 +66,7 @@ const Profile: React.FC = () => {
         }
     };
 
-    const [activeTab, setActiveTab] = useState<'details' | 'history'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'history' | 'recommendations'>('details');
 
     if (loading) {
         return (
@@ -186,6 +191,18 @@ const Profile: React.FC = () => {
                         >
                             History Log
                         </button>
+                        <button 
+                            onClick={() => setActiveTab('recommendations')}
+                            style={{ 
+                                padding: '12px 30px', borderRadius: '14px', border: 'none', 
+                                background: activeTab === 'recommendations' ? 'var(--accent-gold)' : 'transparent',
+                                color: activeTab === 'recommendations' ? '#000' : '#fff',
+                                fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer', transition: '0.3s',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            Smart Picks
+                        </button>
                     </div>
 
                     {/* MAIN PANEL */}
@@ -290,7 +307,7 @@ const Profile: React.FC = () => {
                                     )}
                                 </div>
                             </>
-                        ) : (
+                        ) : activeTab === 'history' ? (
                             <>
                                 <div className="profile-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                                     <div>
@@ -363,7 +380,51 @@ const Profile: React.FC = () => {
                                     })()}
                                 </div>
                             </>
-                        )}
+                        ) : activeTab === 'recommendations' ? (
+                            <>
+                                <div className="profile-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Smart <span style={{ color: 'var(--accent-gold)' }}>Recommendations</span></h3>
+                                        <p style={{ color: 'var(--text-dim)', margin: '5px 0 0 0' }}>AI-driven microservice catalog matching your exact dietary parameters.</p>
+                                    </div>
+                                    <div className="badge" style={{ padding: '8px 20px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid #22c55e' }}>AI ALIGNED</div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                                    {recommendations.length > 0 ? recommendations.map((item, idx) => (
+                                        <div key={idx} className="glass-panel" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                            {item.imageUrl && (
+                                                <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                                            )}
+                                            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                                    <span style={{ fontSize: '0.65rem', background: 'rgba(251, 146, 60, 0.1)', color: 'var(--accent-gold)', padding: '5px 12px', borderRadius: '100px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                                        {item.categoryName || 'Recommended'}
+                                                    </span>
+                                                    {item.vegan && (
+                                                        <span style={{ fontSize: '0.65rem', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '5px 12px', borderRadius: '100px', fontWeight: 800 }}>🌱 VEGAN</span>
+                                                    )}
+                                                </div>
+                                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1.2rem' }}>{item.name}</h4>
+                                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '15px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                    {item.description}
+                                                </p>
+                                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '15px', borderTop: '1px solid var(--glass-border)' }}>
+                                                    <span style={{ fontWeight: 800 }}>LKR {item.price}</span>
+                                                    <button className="btn-gold" style={{ padding: '8px 15px', fontSize: '0.8rem' }} onClick={() => addToCart(item)}>Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.01)', borderRadius: '20px', border: '1px dashed var(--glass-border)' }}>
+                                            <div style={{ fontSize: '2.5rem', marginBottom: '15px' }}>🤖</div>
+                                            <h4 style={{ margin: '0 0 10px 0' }}>Analyzing Neural Patterns...</h4>
+                                            <p style={{ color: 'var(--text-dim)' }}>Not enough data to calculate unique recommendations yet.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                 </div>
             </div>

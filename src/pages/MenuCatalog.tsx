@@ -180,7 +180,7 @@ const MenuCatalog: React.FC = () => {
                 </p>
             </div>
 
-            <div className="glass-panel" style={{ marginBottom: '30px', padding: '24px' }}>
+            {/* <div className="glass-panel" style={{ marginBottom: '30px', padding: '24px' }}>
                 <h3 style={{ marginTop: 0, color: 'var(--accent-gold)' }}>Personalized Menu</h3>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                     <input
@@ -218,7 +218,7 @@ const MenuCatalog: React.FC = () => {
                         </strong>
                     </p>
                 )}
-            </div>
+            </div> */}
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginBottom: '60px' }}>
                 <div style={{
@@ -320,28 +320,28 @@ const MenuCatalog: React.FC = () => {
                                         {item.categoryName || categoriesMap[item.categoryId] || 'General'}
                                     </span>
                                     {item.vegan ? (
-  <span style={{
-    fontSize: '0.65rem',
-    background: 'rgba(34, 197, 94, 0.1)',
-    color: '#22c55e',
-    padding: '5px 12px',
-    borderRadius: '100px',
-    fontWeight: 800
-  }}>
-    🌱 VEGAN
-  </span>
-) : (
-  <span style={{
-    fontSize: '0.65rem',
-    background: 'rgba(239, 68, 68, 0.1)',
-    color: '#ef4444',
-    padding: '5px 12px',
-    borderRadius: '100px',
-    fontWeight: 800
-  }}>
-    🔴 NON-VEGAN
-  </span>
-)}
+                                        <span style={{
+                                            fontSize: '0.65rem',
+                                            background: 'rgba(34, 197, 94, 0.1)',
+                                            color: '#22c55e',
+                                            padding: '5px 12px',
+                                            borderRadius: '100px',
+                                            fontWeight: 800
+                                        }}>
+                                            🌱 VEGAN
+                                        </span>
+                                        ) : (
+                                        <span style={{
+                                            fontSize: '0.65rem',
+                                            background: 'rgba(239, 68, 68, 0.1)',
+                                            color: '#ef4444',
+                                            padding: '5px 12px',
+                                            borderRadius: '100px',
+                                            fontWeight: 800
+                                        }}>
+                                            🔴 NON-VEGAN
+                                        </span>
+                                        )}
                                 </div>
                                 <div className={`status-dot ${item.isAvailable ? 'live' : 'offline'}`} />
                             </div>
