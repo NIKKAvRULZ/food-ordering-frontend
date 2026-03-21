@@ -25,6 +25,7 @@ export const getDeals = () => axios.get(`${API_BASE_URL}/deals`);
 
 export const triggerOrderEmail = (userId: string, orderId: string) => axios.post(`${NOTIFICATION_URL}/api/v1/notify`, { userId, orderId, status: "PAID" });
 export const triggerReceiptEmail = (userId: string, orderId: string) => axios.get(`${NOTIFICATION_URL}/api/v1/notify/receipt/${userId}/${orderId}`);
+export const triggerWelcomeEmail = (userId: string) => axios.get(`${NOTIFICATION_URL}/api/v1/notify/welcome/${userId}`);
 
 export const getCatalogStatus = () => axios.get(`${CATALOG_URL}/health`);
 

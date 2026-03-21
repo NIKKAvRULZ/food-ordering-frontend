@@ -24,7 +24,13 @@ const Register: React.FC = () => {
     try {
         // CRITICAL FIX: Add the actual API call
         console.log("Sending to Backend:", formData); 
-        await registerUser(formData); 
+        const res = await registerUser(formData); 
+        
+        // Trigger Welcome Email (Async)
+        const userId = res.data?.id || res.data?.data?.id || res.data?._id;
+        if (userId) {
+            import('../services/api').then(m => m.triggerWelcomeEmail(userId.toString())).catch(console.error);
+        }
         
         // Only show success if the backend returns a 200 OK
         setMessage('✅ Registration Successful! Redirecting to login...');
