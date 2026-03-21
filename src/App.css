@@ -240,7 +240,7 @@ h5 {
 /* Tablet & Large Mobile */
 @media (max-width: 1024px) {
   .content {
-    padding-top: 100px;
+    padding-top: 130px;
     padding-left: 5%;
     padding-right: 5%;
   }
@@ -263,7 +263,7 @@ h5 {
   }
 
   .content {
-    padding-top: 90px;
+    padding-top: 150px;
     padding-left: 20px;
     padding-right: 20px;
   }
@@ -332,7 +332,7 @@ h5 {
 
   /* Landing Hero Center */
   section[style*="min-height: 100vh"] {
-    padding: 120px 20px 60px !important;
+    padding: 150px 20px 60px !important;
     text-align: center;
   }
 
@@ -344,7 +344,7 @@ h5 {
 
   /* Remove decorative floating elements to save space/perf on mobile */
   .animate-float,
-  div[style*="blur"] {
+  .ambient-bg-glow {
     display: none !important;
   }
 }

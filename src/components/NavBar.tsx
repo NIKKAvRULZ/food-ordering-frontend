@@ -128,8 +128,8 @@ const NavBar: React.FC = () => {
             </div>
 
             {/* 3. ACTION SECTION (RIGHT) */}
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                <div style={{ 
+            <div className="nav-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <div className="health-pip-container" style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '12px',
@@ -148,7 +148,7 @@ const NavBar: React.FC = () => {
                         animation: 'blink 2s infinite'
                     }} title={isSystemHealthy ? "Global Operations: LIVE" : "System Degraded"}></div>
 
-                    <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+                    <div className="health-pip-divider" style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
 
                     {/* Cart Trigger - ONLY SHOW IF USER LOGGED IN */}
                     {user ? (
@@ -229,8 +229,8 @@ const NavBar: React.FC = () => {
                         </button>
                     </>
                 ) : (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, padding: '10px 15px' }}>Login</Link>
+                    <div className="nav-guest-actions" style={{ display: 'flex', gap: '8px' }}>
+                        <Link className="nav-login-btn" to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, padding: '10px 15px' }}>Login</Link>
                         <Link to="/register" className="btn-gold" style={{ padding: '10px 22px', fontSize: '0.85rem' }}>Join Now</Link>
                     </div>
                 )}
@@ -263,8 +263,40 @@ const NavBar: React.FC = () => {
                     100% { opacity: 1; }
                 }
                 @media (max-width: 900px) {
-                    nav { padding: 0 20px !important; }
-                    .nav-links-center { display: none !important; }
+                    nav { 
+                        height: auto !important; 
+                        flex-direction: row !important; 
+                        flex-wrap: wrap !important;
+                        padding: 12px 18px !important; 
+                        gap: 12px;
+                        border-radius: 24px !important;
+                    }
+                    .nav-brand {
+                        transform: scale(0.9);
+                        transform-origin: left center;
+                    }
+                    .nav-actions {
+                        order: 2;
+                        gap: 10px !important;
+                    }
+                    .nav-links-center { 
+                        display: flex !important;
+                        order: 3;
+                        width: 100%;
+                        justify-content: space-evenly;
+                        background: rgba(0,0,0,0.2) !important;
+                        border: 1px solid rgba(255,255,255,0.05) !important;
+                    }
+                    .health-pip-container {
+                        padding: 6px 12px !important;
+                        gap: 8px !important;
+                    }
+                    .health-pip-divider {
+                        display: none !important;
+                    }
+                    .nav-login-btn {
+                        padding: 10px 5px !important;
+                    }
                 }
             `}</style>
         </nav>

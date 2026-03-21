@@ -76,7 +76,7 @@ const CartPanel: React.FC = () => {
             <div style={{
                 position: 'fixed',
                 inset: 0,
-                zIndex: 3000,
+                zIndex: 5000,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -130,7 +130,7 @@ const CartPanel: React.FC = () => {
         <div style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 2000,
+            zIndex: 4000,
             display: 'flex',
             justifyContent: 'flex-end',
             background: 'rgba(0,0,0,0.5)',
