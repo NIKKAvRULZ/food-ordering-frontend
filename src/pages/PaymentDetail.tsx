@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getPaymentWithDetails, refundPayment } from '../services/paymentApi';
-import type { PaymentWithDetails, PaymentStatus } from '../types/payment';
+import type { PaymentWithDetails } from '../types/payment';
 
 const STATUS_COLOR: Record<string, { bg: string; color: string; label: string }> = {
   succeeded:  { bg: 'rgba(16,185,129,0.15)',  color: '#10b981', label: 'SUCCEEDED' },
@@ -37,19 +37,19 @@ const PaymentDetail: React.FC = () => {
       setLoading(true);
       try {
         const res = await getPaymentWithDetails(id);
-        const raw = res.data?.data ?? (res.data as any);
+        const raw: any = res.data?.data ?? (res.data as any);
         // Backend /details returns { payment, order, user } — unwrap and merge
         if (raw?.payment) {
           const merged: PaymentWithDetails = {
             ...raw.payment.toObject?.() ?? raw.payment,
-            orderDetails: raw.order ?? raw.payment.orderDetails ?? null,
-            userDetails: raw.user ?? raw.payment.userDetails ?? null,
+            orderDetails: raw.order ?? raw.payment.orderDetails,
+            userDetails: raw.user ?? raw.payment.userDetails,
           };
           setPayment(merged);
         } else {
           setPayment(raw as PaymentWithDetails);
         }
-      } catch {
+      } catch (err) {
         setError('Payment record not found.');
       } finally {
         setLoading(false);
@@ -65,7 +65,7 @@ const PaymentDetail: React.FC = () => {
     try {
       const res = await refundPayment(id, { reason: refundReason || undefined });
       const updated = res.data?.data ?? (res.data as any);
-      setPayment(updated as PaymentWithDetails);
+      setPayment(prev => prev ? { ...prev, ...updated } : updated as PaymentWithDetails);
       setShowRefund(false);
       setRefundReason('');
     } catch (err: any) {
@@ -174,7 +174,7 @@ const PaymentDetail: React.FC = () => {
               textTransform: 'capitalize', letterSpacing: '0.5px', transition: '0.2s',
             }}
           >
-            {tab === 'payment' ? 'Payment' : tab === 'order' ? 'Order' : 'Timeline'}
+            {tab}
           </button>
         ))}
       </div>
@@ -230,15 +230,21 @@ const PaymentDetail: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {[
               { icon: '📋', label: 'Payment Created', time: payment.createdAt, desc: 'Payment record initiated in the system.', color: 'var(--accent-gold)' },
-              ...(payment.status !== 'pending' ? [{ icon: (payment.status === 'succeeded' || payment.status === 'completed') ? '✅' : '❌', label: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Payment Succeeded' : 'Payment Failed', time: payment.updatedAt, desc: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Funds captured via Stripe.' : 'Transaction declined by payment processor.', color: (payment.status === 'succeeded' || payment.status === 'completed') ? '#10b981' : '#ef4444' }] : []),
+              ...(payment.status !== 'pending' ? [{ 
+                icon: (payment.status === 'succeeded' || payment.status === 'completed') ? '✅' : '❌', 
+                label: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Payment Succeeded' : 'Payment Failed', 
+                time: payment.updatedAt, 
+                desc: (payment.status === 'succeeded' || payment.status === 'completed') ? 'Funds captured via Stripe.' : 'Transaction declined by payment processor.', 
+                color: (payment.status === 'succeeded' || payment.status === 'completed') ? '#10b981' : '#ef4444' 
+              }] : []),
               ...(payment.status === 'refunded' ? [{ icon: '↩', label: 'Refund Issued', time: payment.updatedAt, desc: `Refund processed. Reason: ${payment.refundReason || 'Not specified'}`, color: '#94a3b8' }] : []),
-            ].map((event, idx) => (
+            ].map((event, idx, arr) => (
               <div key={idx} style={{ display: 'flex', gap: '16px', paddingBottom: '24px', position: 'relative' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${event.color}20`, border: `2px solid ${event.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}>
                     {event.icon}
                   </div>
-                  {idx < 2 && <div style={{ width: '2px', flex: 1, background: 'var(--glass-border)', marginTop: '8px' }} />}
+                  {idx < arr.length - 1 && <div style={{ width: '2px', flex: 1, background: 'var(--glass-border)', marginTop: '8px' }} />}
                 </div>
                 <div style={{ paddingTop: '4px' }}>
                   <div style={{ fontWeight: 600, marginBottom: '2px' }}>{event.label}</div>

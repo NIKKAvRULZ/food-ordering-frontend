@@ -50,6 +50,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
 
       if (pmError || !pm) {
         setError(pmError?.message || 'Invalid card details. Please try again.');
+        setProcessing(false);
         return;
       }
 
@@ -58,7 +59,7 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
 
       const createRes = await createPayment({
         orderId,
-        userId: user?.id?.toString() || orderInfo.userId,
+        userId: user?.id?.toString() || user?._id?.toString() || orderInfo.userId,
         amount,
         currency: (orderInfo.currency as any) || 'lkr',
         paymentMethod: 'card',
@@ -67,11 +68,14 @@ const CheckoutForm: React.FC<{ orderId: string; orderInfo: OrderInfo; onSuccess:
 
       const paymentId =
         createRes.data?.data?.paymentId ||
+        (createRes.data as any)?.paymentId ||
+        (createRes.data as any)?.data?._id ||
         (createRes.data as any)?._id ||
-        (createRes.data as any)?.data?._id;
+        ((createRes.data as any)?.data?.paymentId);
 
       if (!paymentId) {
         setError('Could not initialise payment session. Please try again.');
+        setProcessing(false);
         return;
       }
 
@@ -247,10 +251,11 @@ const PaymentCheckout: React.FC = () => {
     try {
       const isDev = import.meta.env.DEV;
       const orderUrl = isDev ? `/proxy/order` : import.meta.env.VITE_ORDER_URL;
-      const res = await axios.get<OrderInfo>(
+      const res = await axios.get<any>(
         `${orderUrl}/orders/${id}`
       );
-      setOrderInfo(res.data);
+      const data = res.data?.data ?? res.data;
+      setOrderInfo(data);
       setStep('confirm');
     } catch {
       setFetchError('Order not found. Please check the Order ID.');
@@ -284,6 +289,14 @@ const PaymentCheckout: React.FC = () => {
           <p style={{ color: 'var(--text-dim)' }}>Please log in to proceed with payment.</p>
           <button className="btn-gold" onClick={() => navigate('/login')} style={{ marginTop: '16px' }}>Sign In</button>
         </div>
+      </div>
+    );
+  }
+
+  if (fetching) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 100px)' }}>
+        <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Locating order details...</div>
       </div>
     );
   }
