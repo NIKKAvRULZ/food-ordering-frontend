@@ -22,33 +22,40 @@ const CartPanel: React.FC = () => {
 
         if (cartItems.length === 0) return;
 
+        const resolvedUserId = String(
+            user._id ?? user.id ?? user.userId ?? ''
+        ).trim();
+
+        if (!resolvedUserId || resolvedUserId === 'undefined' || resolvedUserId === 'null') {
+            setError('Invalid user session detected. Please log out and log in again.');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         try {
-            // Consolidate into a single order as per modern system requirements
+            const totalQty = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
+            // Align exactly with provided teammate schema:
+            // { "userId": "u2", "product": "burger", "quantity": 2, "price": 1200, "status": "pending", "items": [{"menuItemId": 1, "quantity": 2}] }
             const orderPayload = {
-                userId: String(user.id || user._id),
-                status: 'pending',
-                address: user.deliveryAddress || "Standard Delivery",
-                totalAmount: cartTotal,
-                totalPrice: cartTotal, // Fallback
-                // Legacy support fields
+                userId: resolvedUserId,
                 product: cartItems.length > 1 ? `${cartItems[0].name} + ${cartItems.length - 1} items` : cartItems[0].name,
-                quantity: cartItems.reduce((acc, i) => acc + i.quantity, 0),
-                price: cartTotal,
-                // Modern structured items
-                items: cartItems.map(item => ({
-                    menuItemId: String(item.id),
-                    productId: String(item.id), // Fallback alias
-                    product: item.name,         // Crucial field for some teammate services
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                }))
+                quantity: totalQty,
+                price: cartTotal, // Main amount field from your schema
+                status: 'pending',
+                items: cartItems.map(item => {
+                    // Try to use numeric ID if available for compatibility
+                    const numericId = parseInt(String(item.id));
+                    return {
+                        menuItemId: isNaN(numericId) ? String(item.id) : numericId,
+                        quantity: item.quantity
+                    };
+                })
             };
             
-            console.log("Placing Order with payload:", orderPayload);
+            console.log("Placing Order with Exact Schema:", orderPayload);
             const response = await axios.post(`${ORDER_URL}/orders`, orderPayload);
             const newOrderId = response.data?.orderId || response.data?.id;
 
@@ -68,7 +75,11 @@ const CartPanel: React.FC = () => {
             console.error("Order Failure Trace:", err);
             const serverMsg = err.response?.data?.message || err.response?.data;
             if (err.response?.status === 500) {
-                setError('Order Server Critical Failure (500). Please check network synchronization.');
+                if (String(serverMsg).toLowerCase().includes('user validation failed')) {
+                    setError('Your current login user could not be validated by Order Service. Please log out and log in again.');
+                } else {
+                    setError('Order Service returned an internal error (500). This is likely a backend issue.');
+                }
             } else {
                 setError(serverMsg || 'Failed to place order. Connection interference.');
             }

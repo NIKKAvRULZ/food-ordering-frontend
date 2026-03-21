@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useAuth } from './AuthContext';
 
 interface CartItem {
     id: string | number;
@@ -22,8 +23,35 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isCartOpen, setCartOpen] = useState(false);
+    const userId = user?.id || user?._id || 'guest';
+    const isFirstRun = useRef(true);
+
+    // Initial Load: When user changes, load their specific cart
+    useEffect(() => {
+        const saved = localStorage.getItem(`cart_${userId}`);
+        if (saved) {
+            try {
+                setCartItems(JSON.parse(saved));
+            } catch {
+                setCartItems([]);
+            }
+        } else {
+            setCartItems([]);
+        }
+        isFirstRun.current = true; // Reset first run so we don't immediately save back during load
+    }, [userId]);
+
+    // Save Change: Persist cart to localStorage whenever it changes
+    useEffect(() => {
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+            return;
+        }
+        localStorage.setItem(`cart_${userId}`, JSON.stringify(cartItems));
+    }, [cartItems, userId]);
 
     const addToCart = (item: any) => {
         setCartItems(prev => {
@@ -50,7 +78,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
     };
 
-    const clearCart = () => setCartItems([]);
+    const clearCart = () => {
+        setCartItems([]);
+        localStorage.removeItem(`cart_${userId}`);
+    };
 
     const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
