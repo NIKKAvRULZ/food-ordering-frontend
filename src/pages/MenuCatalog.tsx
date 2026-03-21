@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getMenuItems, getCategories } from '../services/api';
+import { getMenuItems, getCategories, getPersonalizedMenu } from '../services/api';
 import { useCart } from '../context/CartContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -15,27 +15,62 @@ const MenuCatalog: React.FC = () => {
     const [categoryFilter, setCategoryFilter] = useState<string>('All');
     const [categoriesMap, setCategoriesMap] = useState<Record<number, string>>({});
     const [dietaryFilter, setDietaryFilter] = useState<'All' | 'Vegan' | 'Non-Vegan'>('All');
+    const [userIdInput, setUserIdInput] = useState('');
+    const [personalizedMode, setPersonalizedMode] = useState(false);
+    const [personalizedDetected, setPersonalizedDetected] = useState<boolean | null>(null);
+
     const catalogRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        Promise.all([getMenuItems(), getCategories()])
-            .then(([itemsRes, catsRes]) => {
-                // Process Categories
-                if (catsRes.data && Array.isArray(catsRes.data.data)) {
-                    const cmap: Record<number, string> = {};
-                    catsRes.data.data.forEach((c: any) => {
-                        cmap[c.id] = c.name;
-                    });
-                    setCategoriesMap(cmap);
-                }
+    const loadNormalMenu = async () => {
+        setLoading(true);
+        try {
+            const [itemsRes, catsRes] = await Promise.all([getMenuItems(), getCategories()]);
 
-                // Process Menu Items
-                if (itemsRes.data && itemsRes.data.success && Array.isArray(itemsRes.data.data)) {
-                    setMenuItems(itemsRes.data.data);
-                }
-            })
-            .catch(err => console.error("Failed to fetch menu data", err))
-            .finally(() => setLoading(false));
+            if (catsRes.data && Array.isArray(catsRes.data.data)) {
+                const cmap: Record<number, string> = {};
+                catsRes.data.data.forEach((c: any) => {
+                    cmap[c.id] = c.name;
+                });
+                setCategoriesMap(cmap);
+            }
+
+            if (itemsRes.data && itemsRes.data.success && Array.isArray(itemsRes.data.data)) {
+                setMenuItems(itemsRes.data.data);
+            }
+
+            setPersonalizedMode(false);
+            setPersonalizedDetected(null);
+        } catch (err) {
+            console.error("Failed to fetch menu data", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadPersonalizedMenu = async () => {
+        if (!userIdInput.trim()) {
+            alert('Please enter a user ID first.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await getPersonalizedMenu(userIdInput.trim());
+            if (res.data?.success) {
+                setMenuItems(res.data.data || []);
+                setPersonalizedMode(true);
+                setPersonalizedDetected(res.data.detectedVeganPreference);
+            }
+        } catch (err) {
+            console.error("Failed to fetch personalized menu", err);
+            alert('Could not load personalized menu. Please check the user ID.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadNormalMenu();
     }, []);
 
     const availableCategories = ['All', ...Object.values(categoriesMap)];
@@ -43,54 +78,50 @@ const MenuCatalog: React.FC = () => {
     const filteredItems = menuItems.filter(item => {
         const catName = item.categoryName || categoriesMap[item.categoryId] || 'General';
         const matchesCategory = categoryFilter === 'All' || catName === categoryFilter;
-        const matchesDiet = dietaryFilter === 'All' 
+        const matchesDiet = dietaryFilter === 'All'
             || (dietaryFilter === 'Vegan' && item.vegan)
             || (dietaryFilter === 'Non-Vegan' && !item.vegan);
-            
+
         return matchesCategory && matchesDiet;
     });
 
     const hasAnimatedRef = useRef(false);
 
-    // One-time entrance animation
     useEffect(() => {
-        if (!loading && catalogRef.current && !hasAnimatedRef.current && Object.keys(categoriesMap).length > 0) {
+        if (!loading && catalogRef.current && !hasAnimatedRef.current && Object.keys(categoriesMap).length >= 0) {
             const ctx = gsap.context(() => {
-                // Initial Header Entrance
-                gsap.fromTo('.catalog-header > *', 
+                gsap.fromTo('.catalog-header > *',
                     { y: 30, opacity: 0 },
                     { y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: 'power3.out' }
                 );
 
-                // Filter Row Entrance - only once
                 gsap.fromTo('.filter-btn',
                     { scale: 0.9, opacity: 0 },
-                    { 
-                        scale: 1, 
-                        opacity: 1, 
-                        duration: 0.6, 
-                        stagger: 0.05, 
-                        ease: 'back.out(1.7)', 
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        duration: 0.6,
+                        stagger: 0.05,
+                        ease: 'back.out(1.7)',
                         delay: 0.3,
-                        onComplete: function() {
+                        onComplete: function () {
                             gsap.set(this.targets(), { clearProps: 'all' });
                         }
                     }
                 );
             }, catalogRef);
-            
+
             hasAnimatedRef.current = true;
             return () => ctx.revert();
         }
     }, [loading, categoriesMap]);
 
-    // Recurring scroll and cards animation
     useEffect(() => {
         if (!loading && catalogRef.current && filteredItems.length > 0) {
             const ctx = gsap.context(() => {
                 const cards = gsap.utils.toArray('.menu-cat-card');
                 cards.forEach((card: any, i) => {
-                    gsap.fromTo(card, 
+                    gsap.fromTo(card,
                         { y: 60, opacity: 0 },
                         {
                             y: 0,
@@ -137,7 +168,7 @@ const MenuCatalog: React.FC = () => {
         <div ref={catalogRef} style={{ padding: '40px 8%', maxWidth: '1400px', margin: '0 auto', position: 'relative' }}>
             <div style={{ position: 'absolute', top: '10%', right: '-5%', width: '300px', height: '300px', background: 'var(--accent-gold)', filter: 'blur(150px)', opacity: 0.03, borderRadius: '50%' }}></div>
 
-            <div className="catalog-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <div className="catalog-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
                 <div style={{ display: 'inline-block', padding: '6px 15px', borderRadius: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', fontSize: '0.7rem', fontWeight: 800, color: 'var(--accent-gold)', letterSpacing: '2px', marginBottom: '20px' }}>
                     CULINARY REPERTORY
                 </div>
@@ -149,12 +180,51 @@ const MenuCatalog: React.FC = () => {
                 </p>
             </div>
 
+            <div className="glass-panel" style={{ marginBottom: '30px', padding: '24px' }}>
+                <h3 style={{ marginTop: 0, color: 'var(--accent-gold)' }}>Personalized Menu</h3>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input
+                        type="text"
+                        value={userIdInput}
+                        onChange={(e) => setUserIdInput(e.target.value)}
+                        placeholder="Enter user ID"
+                        style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            color: '#fff',
+                            border: '1px solid var(--glass-border)',
+                            padding: '12px',
+                            borderRadius: '10px',
+                            minWidth: '320px'
+                        }}
+                    />
+                    <button className="btn-gold" onClick={loadPersonalizedMenu}>
+                        Load Personalized Menu
+                    </button>
+                    <button
+                        className="btn-gold"
+                        style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: '#fff' }}
+                        onClick={loadNormalMenu}
+                    >
+                        Reset
+                    </button>
+                </div>
+
+                {personalizedMode && (
+                    <p style={{ marginTop: '14px', color: 'var(--text-dim)' }}>
+                        Personalized mode active —
+                        detected preference:{" "}
+                        <strong style={{ color: personalizedDetected ? '#22c55e' : '#f97316' }}>
+                            {personalizedDetected ? 'Vegan' : 'Non-Vegan'}
+                        </strong>
+                    </p>
+                )}
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginBottom: '60px' }}>
-                {/* Category Filter */}
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '10px', 
-                    justifyContent: 'center', 
+                <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    justifyContent: 'center',
                     flexWrap: 'wrap',
                     padding: '10px',
                     background: 'rgba(255,255,255,0.02)',
@@ -163,8 +233,8 @@ const MenuCatalog: React.FC = () => {
                     border: '1px solid var(--glass-border)'
                 }}>
                     {availableCategories.map(cat => (
-                        <button 
-                            key={cat} 
+                        <button
+                            key={cat}
                             className="filter-btn category-btn"
                             onClick={() => setCategoryFilter(cat)}
                             style={{
@@ -184,11 +254,10 @@ const MenuCatalog: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Dietary Filter */}
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '10px', 
-                    justifyContent: 'center', 
+                <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    justifyContent: 'center',
                     padding: '8px',
                     background: 'rgba(255,255,255,0.01)',
                     borderRadius: '100px',
@@ -196,8 +265,8 @@ const MenuCatalog: React.FC = () => {
                     border: '1px solid var(--glass-border)'
                 }}>
                     {(['All', 'Vegan', 'Non-Vegan'] as const).map(diet => (
-                        <button 
-                            key={diet} 
+                        <button
+                            key={diet}
                             className="filter-btn dietary-btn"
                             onClick={() => setDietaryFilter(diet)}
                             style={{
@@ -224,18 +293,18 @@ const MenuCatalog: React.FC = () => {
                     <div key={idx} className="food-card menu-cat-card" style={{ padding: 0, opacity: item.isAvailable ? 1 : 0.6 }}>
                         {item.imageUrl && (
                             <div style={{ overflow: 'hidden', height: '240px', position: 'relative' }}>
-                                <img 
+                                <img
                                     className="card-parallax-img"
-                                    src={item.imageUrl} 
-                                    alt={item.name} 
-                                    style={{ 
-                                        width: '100%', 
-                                        height: '120%', 
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    style={{
+                                        width: '100%',
+                                        height: '120%',
                                         objectFit: 'cover',
                                         top: '-10%',
                                         position: 'relative',
                                         transition: 'opacity 0.5s'
-                                    }} 
+                                    }}
                                 />
                                 {!item.isAvailable && (
                                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.2rem', color: '#fff' }}>
@@ -246,7 +315,7 @@ const MenuCatalog: React.FC = () => {
                         )}
                         <div style={{ padding: '25px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                                <div style={{ display: 'flex', gap: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '0.65rem', background: 'rgba(251, 146, 60, 0.1)', color: 'var(--accent-gold)', padding: '5px 12px', borderRadius: '100px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
                                         {item.categoryName || categoriesMap[item.categoryId] || 'General'}
                                     </span>
@@ -268,8 +337,8 @@ const MenuCatalog: React.FC = () => {
                                         LKR {Number(item.price || 0).toLocaleString()}
                                     </span>
                                 </div>
-                                <button 
-                                    className="btn-gold" 
+                                <button
+                                    className="btn-gold"
                                     style={{ padding: '12px 25px', opacity: item.isAvailable ? 1 : 0.5, cursor: item.isAvailable ? 'pointer' : 'not-allowed' }}
                                     onClick={() => item.isAvailable && addToCart(item)}
                                     disabled={!item.isAvailable}
