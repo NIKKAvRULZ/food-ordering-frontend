@@ -20,5 +20,10 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Run Snyk SAST Scanner
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
       - name: Build Project
         run: npm run build
