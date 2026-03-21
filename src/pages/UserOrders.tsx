@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../services/api';
 import { getPaymentsByUser } from '../services/paymentApi';
+import gsap from 'gsap';
 
 const STATUS_COLOR: Record<string, { bg: string; color: string; label: string }> = {
   pending: { bg: 'rgba(251,191,36,0.15)', color: '#fbbf24', label: 'PENDING' },
@@ -52,7 +53,7 @@ interface Order {
   totalPrice?: number;
 }
 
-const UserPayments: React.FC = () => {
+const UserOrders: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -62,6 +63,7 @@ const UserPayments: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const PER_PAGE = 8;
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -108,16 +110,31 @@ const UserPayments: React.FC = () => {
     fetchOrders();
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!loading && listRef.current) {
+        const ctx = gsap.context(() => {
+            gsap.from('.order-card-row', {
+                opacity: 0,
+                x: -20,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: 'power2.out'
+            });
+        }, listRef);
+        return () => ctx.revert();
+    }
+  }, [loading, orders, page]);
+
   if (!user) return <Navigate to="/login" replace />;
 
   const totalPages = Math.ceil(orders.length / PER_PAGE);
   const paginated = orders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
-    <div style={{ padding: '40px 8%' }}>
+    <div style={{ padding: '40px 8%' }} ref={listRef}>
       
       {/* Header */}
-      <div style={{ marginBottom: '40px' }}>
+      <div style={{ marginBottom: '40px' }} className="fade-in-gsap">
         <div
           style={{
             fontSize: '0.65rem',
@@ -177,7 +194,7 @@ const UserPayments: React.FC = () => {
             {paginated.map((o) => (
               <div
                 key={o.id}
-                className="glass-panel"
+                className="glass-panel order-card-row"
                 style={{
                   padding: '20px 28px',
                   borderRadius: '16px',
@@ -272,4 +289,4 @@ const UserPayments: React.FC = () => {
   );
 };
 
-export default UserPayments;
+export default UserOrders;

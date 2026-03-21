@@ -1,191 +1,422 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const Landing: React.FC = () => {
-  const { statuses } = useAuth();
+    const { statuses } = useAuth();
+    const heroContentRef = useRef<HTMLDivElement>(null);
+    const burgerRef = useRef<HTMLDivElement>(null);
+    const sushiRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div className="landing-root" style={{ 
-      color: '#fff', 
-      background: 'transparent',
-      minHeight: '100vh'
-    }}>
-      {/* Dynamic Keyframes */}
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(3deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slowZoom {
-          from { transform: scale(1); }
-          to { transform: scale(1.1); }
-        }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .delay-1 { animation-delay: 0.2s; }
-        .delay-2 { animation-delay: 0.4s; }
-        .hero-bg {
-          animation: slowZoom 20s ease-in-out infinite alternate;
-        }
-      `}</style>
+    useEffect(() => {
+        // Hero Animations
+        const ctx = gsap.context(() => {
+            gsap.from('.hero-content-inner > *', {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: 'power3.out'
+            });
 
-      {/* Hero Section */}
-      <section style={{ 
-        position: 'relative', 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        padding: '0 8%',
-        overflow: 'hidden'
-      }}>
-        {/* Animated Hero Background */}
-        <div className="hero-bg" style={{ 
-          position: 'absolute', 
-          inset: 0, 
-          zIndex: 0,
-          background: `linear-gradient(to right, rgba(15, 23, 42, 1) 20%, rgba(15, 23, 42, 0.4) 60%, rgba(15, 23, 42, 0.8) 100%), url('/gourmet_hero_bg_1773145858270.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.8)'
-        }}></div>
+            // Parallax for floating assets
+            gsap.to(burgerRef.current, {
+                y: -100,
+                scrollTrigger: {
+                    trigger: '.hero-root',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 1.5
+                }
+            });
 
-        {/* Floating Decorative Items */}
-        <div className="animate-float" style={{ position: 'absolute', top: '15%', right: '15%', width: '300px', height: '300px', zIndex: 1, opacity: 0.8 }}>
-           <img src="https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png" alt="Burger" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))' }} />
-        </div>
-        <div className="animate-float delay-2" style={{ position: 'absolute', bottom: '15%', right: '25%', width: '220px', height: '220px', zIndex: 1, opacity: 0.7 }}>
-           <img src="https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png" alt="Sushi" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '30px', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }} />
-        </div>
+            gsap.to(sushiRef.current, {
+                y: 60,
+                scrollTrigger: {
+                    trigger: '.hero-root',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 2
+                }
+            });
 
-        <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
-          <div className="badge fade-in" style={{ marginBottom: '25px', letterSpacing: '3px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--accent-gold)', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
-             MICROSHELF-GRADE CULINARY
-          </div>
-          <h1 className="fade-in delay-1" style={{ fontSize: '5.5rem', fontWeight: 900, margin: '0 0 25px 0', lineHeight: 0.85, letterSpacing: '-5px' }}>
-            A Move Towards <br />
-            <span style={{ 
-              background: 'linear-gradient(to right, var(--accent-gold) 0%, #fff 100%)', 
-              WebkitBackgroundClip: 'text', 
-              WebkitTextFillColor: 'transparent',
-              fontStyle: 'italic'
-            }}>Digital Gastronomy</span>
-          </h1>
-          <p className="fade-in delay-2" style={{ color: 'var(--text-dim)', fontSize: '1.4rem', maxWidth: '600px', marginBottom: '45px', fontWeight: 300, lineHeight: 1.5 }}>
-            Unlock the future of taste. Gourmet.Express delivers curated dining experiences powered by a zero-latency microservice core.
-          </p>
-          <div className="fade-in delay-2" style={{ display: 'flex', gap: '20px' }}>
-            <Link to="/menu" className="btn-gold" style={{ padding: '18px 50px', fontSize: '1.2rem', boxShadow: '0 10px 40px rgba(212, 175, 55, 0.3)' }}>Launch Palette</Link>
-            <Link to="/register" style={{ 
-              padding: '18px 50px', borderRadius: '100px', background: 'rgba(255,255,255,0.02)', 
-              border: '1px solid var(--glass-border)', color: '#fff', textDecoration: 'none', 
-              fontWeight: 700, fontSize: '1.1rem', transition: '0.3s', backdropFilter: 'blur(10px)'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
-            >Identity Check</Link>
-          </div>
-        </div>
-      </section>
+            // Feature Section Reveal
+            gsap.from('.feature-card', {
+                scale: 0.8,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                scrollTrigger: {
+                    trigger: '.features-grid',
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                }
+            });
 
-      {/* Featured Categories Strip */}
-      <section style={{ padding: '80px 8%', background: '#0a101f' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
-          {[
-            { tag: 'BURGER', img: 'https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png', label: 'Artisan Buns' },
-            { tag: 'SUSHI', img: 'https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png', label: 'Edo-Style' },
-            { tag: 'STEAK', img: 'https://i.postimg.cc/5yBwfWfX/prime_steak_hero_1773147661998.png', label: 'Prime Cuts' },
-            { tag: 'VEGAN', img: 'https://i.postimg.cc/yxmF7C7J/pure_plant_vegan_bowl_1773147689203.png', label: 'Pure Plant' },
-          ].map((cat, i) => (
-            <div key={i} className="glass-panel" style={{ 
-              width: '240px', padding: '20px', textAlign: 'center', 
-              transition: '0.4s', cursor: 'pointer', overflow: 'hidden'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-15px)'; e.currentTarget.style.borderColor = 'var(--accent-gold)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--glass-border)'; }}
-            >
-               <div style={{ height: '140px', borderRadius: '20px', overflow: 'hidden', marginBottom: '15px' }}>
-                  <img src={cat.img} alt={cat.tag} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-               </div>
-               <div style={{ fontSize: '0.6rem', letterSpacing: '2px', color: 'var(--accent-gold)', fontWeight: 800, marginBottom: '5px' }}>{cat.tag}</div>
-               <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{cat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+            // Image Reveal Parallax
+            gsap.to('.hero-bg-overlay', {
+                yPercent: 30,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.hero-root',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+        });
 
-      {/* The Gourmet Experience Section */}
-      <section style={{ padding: '120px 8%', maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '80px', alignItems: 'center' }}>
-          <div>
-            <span className="badge" style={{ marginBottom: '20px' }}>SYSTEM CAPABILITIES</span>
-            <h2 style={{ fontSize: '3.5rem', fontWeight: 800, margin: '0 0 40px 0', letterSpacing: '-2px' }}>
-              Why Choose <span style={{ color: 'var(--accent-gold)' }}>Gourmet.Express</span>?
-            </h2>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-               {[
-                 { icon: '👨‍🍳', title: 'Curated by Architects', desc: 'Every dish is selected for balance, origin, and culinary impact.' },
-                 { icon: '🚀', title: 'Zero-Latency Delivery', desc: 'Predictive logistics ensure your node is reached in under 30 minutes.' },
-                 { icon: '🛡️', title: 'Identity Protection', desc: 'Your dietary data and location shards are fully encrypted end-to-end.' }
-               ].map((feat, i) => (
-                 <div key={i} style={{ display: 'flex', gap: '20px' }}>
-                    <div style={{ fontSize: '2.5rem', flexShrink: 0 }}>{feat.icon}</div>
-                    <div>
-                       <h4 style={{ margin: '0 0 5px 0', fontSize: '1.3rem', fontWeight: 700 }}>{feat.title}</h4>
-                       <p style={{ margin: 0, color: 'var(--text-dim)', lineHeight: 1.6 }}>{feat.desc}</p>
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <div className="landing-page-root">
+            {/* 1. HERO SECTION */}
+            <section className="hero-root">
+                <div className="hero-bg-wrapper">
+                    <div className="hero-bg-overlay"></div>
+                    <div className="hero-gradient-shield"></div>
+                </div>
+
+                <div className="hero-floating-elements">
+                    <div ref={burgerRef} className="parallax-item burger-parallax">
+                        <img src="https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png" alt="Burger" />
                     </div>
-                 </div>
-               ))}
-            </div>
-          </div>
-          
-          <div className="glass-panel" style={{ padding: '40px', position: 'relative', overflow: 'hidden' }}>
-             <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '150px', height: '150px', background: 'var(--accent-gold)', filter: 'blur(80px)', opacity: 0.1 }}></div>
-             <h3 style={{ margin: '0 0 25px 0', fontSize: '1.4rem' }}>Infrastructure Status</h3>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <StatusRow label="Identity Gateway" status={statuses.identity} />
-                <StatusRow label="Catalog Ledger" status={statuses.catalog} />
-                <StatusRow label="Order Pipeline" status={statuses.orders} />
-                <StatusRow label="Payment Cluster" status={statuses.payment || 'pending'} />
-             </div>
-             <div style={{ marginTop: '30px', padding: '15px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'center' }}>
-                LOCAL TIME: {new Date().toLocaleTimeString()}
-             </div>
-          </div>
-        </div>
-      </section>
+                    <div ref={sushiRef} className="parallax-item sushi-parallax">
+                        <img src="https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png" alt="Sushi" />
+                    </div>
+                </div>
 
-      {/* Final Call to Action */}
-      <section style={{ padding: '100px 8%', textAlign: 'center', position: 'relative' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', background: 'var(--accent-gold)', filter: 'blur(200px)', opacity: 0.05, borderRadius: '50%' }}></div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontSize: '4rem', fontWeight: 900, marginBottom: '20px', letterSpacing: '-3px' }}>Ready to <span style={{ color: 'var(--accent-gold)' }}>Initiate</span>?</h2>
-          <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 45px auto' }}>Join thousands of culinary enthusiasts already synchronized with our gourmet network.</p>
-          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-            <Link to="/register" className="btn-gold" style={{ padding: '20px 60px', fontSize: '1.3rem' }}>Create Account</Link>
-          </div>
+                <div className="hero-content-container" ref={heroContentRef}>
+                    <div className="hero-content-inner">
+                        <div className="new-tag">
+                            <span className="dot"></span>
+                            V2.0 NOW REFINED
+                        </div>
+                        <h1 className="hero-headline">
+                            Digital <span className="italic-gold">Gastronomy</span> <br /> 
+                            at Scale.
+                        </h1>
+                        <p className="hero-description">
+                            The definitive intersection of high-tier culinary arts and zero-latency microservice architecture. Synchronize your cravings with our gourmet core.
+                        </p>
+                        <div className="hero-actions">
+                            <Link to="/menu" className="btn-gold-lg">Launch Repository</Link>
+                            <Link to="/register" className="btn-glass-lg">Initialize Access</Link>
+                        </div>
+                        <div className="hero-stats">
+                            <div className="stat-item">
+                                <span className="stat-num">30K+</span>
+                                <span className="stat-label">Active Nodes</span>
+                            </div>
+                            <div className="stat-divider"></div>
+                            <div className="stat-item">
+                                <span className="stat-num">99.9%</span>
+                                <span className="stat-label">Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="scroll-indicator">
+                    <div className="mouse">
+                        <div className="wheel"></div>
+                    </div>
+                    <span>ORBIT SCAN</span>
+                </div>
+            </section>
+
+            {/* 2. CATEGORIES HORIZONTAL */}
+            <section className="categories-strip">
+                <div className="strip-track">
+                    {[
+                        { label: 'BURGER', img: 'https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png' },
+                        { label: 'SUSHI', img: 'https://i.postimg.cc/7h3gqrqf/premium_sushi_set_1773147115835.png' },
+                        { label: 'STEAK', img: 'https://i.postimg.cc/5yBwfWfX/prime_steak_hero_1773147661998.png' },
+                        { label: 'VEGAN', img: 'https://i.postimg.cc/yxmF7C7J/pure_plant_vegan_bowl_1773147689203.png' },
+                        { label: 'PASTA', img: 'https://i.postimg.cc/zvZCmGYb/gourmet_burger_hero_1773147069426.png' },
+                    ].map((c, i) => (
+                        <Link to="/menu" key={i} className="cat-pill">
+                            <div className="pill-img"><img src={c.img} alt={c.label} /></div>
+                            <span className="pill-label">{c.label}</span>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+
+            {/* 3. CAPABILITIES GRID */}
+            <section className="capabilities-section">
+                <div className="section-header-centered">
+                    <div className="mini-badge">ECOSYSTEM</div>
+                    <h2 className="section-title-lg">Engineered for <span className="text-gold">Perfection</span></h2>
+                </div>
+
+                <div className="features-grid">
+                    <div className="glass-panel feature-card">
+                        <div className="card-icon">👨‍🍳</div>
+                        <h3>Architected Menus</h3>
+                        <p>Our menus are not written; they are architected for nutritional density and maximum flavor profile impact.</p>
+                    </div>
+                    <div className="glass-panel feature-card">
+                        <div className="card-icon">🚀</div>
+                        <h3>Zero-Latency Logistics</h3>
+                        <p>Proprietary predictive routing ensures your order leaves the kitchen before you even finish thinking about it.</p>
+                    </div>
+                    <div className="glass-panel feature-card">
+                        <div className="card-icon">🛡️</div>
+                        <h3>Secured Taste</h3>
+                        <p>Your dietary preferences and history are sharded and encrypted, accessible only to authorized gourmet nodes.</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 4. PROCESS SECTION (GSAP PINNING TARGET) */}
+            <section className="process-section">
+                <div className="process-layout">
+                    <div className="process-info">
+                        <div className="mini-badge">WORKFLOW</div>
+                        <h2 className="section-title-lg">How It <span className="text-gold">Works</span></h2>
+                        <div className="steps-list">
+                            <div className="step-item">
+                                <div className="step-num">01</div>
+                                <div className="step-text">
+                                    <h4>Establish Connection</h4>
+                                    <p>Authenticate your identity and initialize your dietary preferences in our global ledger.</p>
+                                </div>
+                            </div>
+                            <div className="step-item">
+                                <div className="step-num">02</div>
+                                <div className="step-text">
+                                    <h4>Select Repository</h4>
+                                    <p>Browse through hundreds of curated items specialized for your current nutritional needs.</p>
+                                </div>
+                            </div>
+                            <div className="step-item">
+                                <div className="step-num">03</div>
+                                <div className="step-text">
+                                    <h4>Initiate Protocol</h4>
+                                    <p>Our zero-latency pipeline triggers immediately, dispatching our high-speed courier units.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="process-visual">
+                        <div className="glass-panel status-visual-card">
+                            <div className="visual-header">Live Infrastructure</div>
+                            <div className="status-bars">
+                                <StatusRow label="Identity Gateway" status={statuses.identity} />
+                                <StatusRow label="Catalog Ledger" status={statuses.catalog} />
+                                <StatusRow label="Order Pipeline" status={statuses.orders} />
+                                <StatusRow label="Payment Cluster" status={statuses.payment || 'pending'} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 5. APP PROMO */}
+            <section className="app-promo-section">
+                <div className="glass-panel promo-card">
+                    <div className="promo-text">
+                        <h2>Gourmet <span className="text-gold">Mobile</span></h2>
+                        <p>Take the power of digital gastronomy with you. Optimized for low-power handheld nodes.</p>
+                        <div className="app-buttons">
+                            <button className="app-btn">App Store</button>
+                            <button className="app-btn">Play Store</button>
+                        </div>
+                    </div>
+                    <div className="promo-img">
+                         <div className="mockup-frame"></div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6. CALL TO ACTION */}
+            <section className="cta-final">
+                <div className="cta-glow-bg"></div>
+                <div className="cta-content-wrapper">
+                    <h2>Ready to <span className="italic-gold">Synchronize?</span></h2>
+                    <p>Join the thousands of operatives already receiving high-grade culinary support.</p>
+                    <Link to="/register" className="btn-gold-cta">Synthesize Account</Link>
+                </div>
+            </section>
+
+            {/* 7. FOOTER */}
+            <footer className="landing-footer">
+                <div className="footer-grid">
+                    <div className="footer-brand-col">
+                        <div className="footer-logo">G.E.</div>
+                        <p>Redefining delivery through the lens of modern software engineering.</p>
+                    </div>
+                    <div className="footer-links">
+                        <div className="link-group">
+                            <h5>ECOSYSTEM</h5>
+                            <Link to="/menu">Kitchen</Link>
+                            <Link to="/about">About</Link>
+                            <Link to="/admin/login">Admin Access</Link>
+                        </div>
+                        <div className="link-group">
+                            <h5>LEGAL</h5>
+                            <Link to="/privacy">Privacy</Link>
+                            <Link to="/terms">Terms</Link>
+                        </div>
+                    </div>
+                </div>
+                <div className="footer-bottom">
+                    <span>© 2026 Gourmet.Express Architecture</span>
+                    <div className="social-links">
+                        <span>LNKD</span>
+                        <span>INST</span>
+                        <span>TWTR</span>
+                    </div>
+                </div>
+            </footer>
+
+            <style>{`
+                .landing-page-root { width: 100%; overflow-x: hidden; background: #010409; }
+                
+                /* Hero */
+                .hero-root { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 0 clamp(1rem, 8vw, 10vw); overflow: hidden; }
+                .hero-bg-wrapper { position: absolute; inset: 0; z-index: 0; }
+                .hero-bg-overlay { position: absolute; inset: 0; background: url('/gourmet_hero_bg_1773145858270.png'); background-size: cover; background-position: center; filter: brightness(0.6); }
+                .hero-gradient-shield { position: absolute; inset: 0; background: radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.8) 40%, transparent 100%); }
+                
+                .hero-floating-elements { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+                .parallax-item { position: absolute; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.6)); transition: transform 0.1s linear; }
+                .burger-parallax { top: 15%; right: 12%; width: clamp(200px, 30vw, 400px); }
+                .sushi-parallax { bottom: 10%; right: 25%; width: clamp(150px, 20vw, 300px); }
+                .parallax-item img { width: 100%; border-radius: 40px; }
+
+                .hero-content-container { position: relative; z-index: 2; width: 100%; max-width: 900px; display: flex; flex-direction: column; justify-content: center; }
+                .hero-content-inner { display: flex; flex-direction: column; gap: 20px; }
+                .new-tag { display: flex; align-items: center; gap: 8px; color: var(--accent-gold); font-size: 0.75rem; font-weight: 800; letter-spacing: 3px; background: rgba(251, 146, 60, 0.08); padding: 8px 16px; border-radius: 50px; border: 1px solid rgba(251, 146, 60, 0.2); width: fit-content; }
+                .new-tag .dot { width: 6px; height: 6px; background: var(--accent-gold); border-radius: 50%; box-shadow: 0 0 10px var(--accent-gold); }
+                .hero-headline { font-size: clamp(3rem, 10vw, 6rem); color: #fff; font-weight: 900; line-height: 0.9; margin: 0; letter-spacing: -4px; }
+                .hero-headline .italic-gold { font-style: italic; background: linear-gradient(to bottom right, var(--accent-gold), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+                .hero-description { color: var(--text-dim); font-size: clamp(1rem, 2vw, 1.4rem); line-height: 1.6; max-width: 600px; margin: 10px 0 30px; font-weight: 300; }
+                .hero-actions { display: flex; gap: 20px; flex-wrap: wrap; }
+                .btn-gold-lg { background: linear-gradient(135deg, var(--accent-gold), #ea580c); color: #000; padding: 22px 50px; border-radius: 100px; font-weight: 800; text-decoration: none; font-size: 1.1rem; box-shadow: 0 20px 40px rgba(234, 88, 12, 0.3); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+                .btn-gold-lg:hover { transform: translateY(-5px); box-shadow: 0 30px 60px rgba(234, 88, 12, 0.4); }
+                .btn-glass-lg { background: rgba(255,255,255,0.03); color: #fff; padding: 22px 50px; border-radius: 100px; font-weight: 700; text-decoration: none; font-size: 1.1rem; border: 1px solid var(--glass-border); transition: 0.3s; backdrop-filter: blur(10px); }
+                .btn-glass-lg:hover { background: rgba(255,255,255,0.08); }
+                
+                .hero-stats { display: flex; gap: 40px; margin-top: 40px; }
+                .stat-item { display: flex; flex-direction: column; }
+                .stat-num { font-size: 1.8rem; font-weight: 800; color: #fff; }
+                .stat-label { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 2px; }
+                .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.1); }
+
+                /* Categories */
+                .categories-strip { padding: 40px 0; background: #000; overflow: hidden; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); }
+                .strip-track { display: flex; gap: 60px; padding: 0 8vw; align-items: center; width: max-content; }
+                .cat-pill { display: flex; align-items: center; gap: 15px; text-decoration: none; color: #fff; opacity: 0.5; transition: 0.3s; }
+                .cat-pill:hover { opacity: 1; transform: scale(1.05); }
+                .pill-img { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; }
+                .pill-img img { width: 100%; height: 100%; object-fit: cover; }
+                .pill-label { font-size: 0.8rem; font-weight: 800; letter-spacing: 3px; }
+
+                /* Capabilities */
+                .capabilities-section { padding: 120px 8vw; max-width: 1400px; margin: 0 auto; }
+                .section-header-centered { text-align: center; margin-bottom: 80px; }
+                .mini-badge { display: inline-block; color: var(--accent-gold); font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; margin-bottom: 20px; }
+                .section-title-lg { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
+                .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+                .feature-card { transition: 0.4s; }
+                .feature-card:hover { transform: translateY(-10px); border-color: var(--accent-gold); }
+                .card-icon { font-size: 3rem; margin-bottom: 25px; }
+                .feature-card h3 { font-size: 1.6rem; margin-bottom: 15px; }
+                .feature-card p { color: var(--text-dim); line-height: 1.6; }
+
+                /* Process Section */
+                .process-section { padding: 120px 8vw; background: #0a1120; border-radius: 100px 100px 0 0; }
+                .process-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; max-width: 1400px; margin: 0 auto; align-items: center; }
+                .steps-list { display: flex; flex-direction: column; gap: 40px; margin-top: 50px; }
+                .step-item { display: flex; gap: 30px; }
+                .step-num { font-size: 3rem; font-weight: 900; color: rgba(251, 146, 60, 0.1); line-height: 1; }
+                .step-text h4 { font-size: 1.4rem; margin: 0 0 10px 0; }
+                .step-text p { color: var(--text-dim); line-height: 1.6; }
+                .visual-header { font-size: 1rem; font-weight: 800; margin-bottom: 30px; text-align: center; color: var(--accent-gold); }
+                .status-bars { display: flex; flex-direction: column; gap: 15px; }
+
+                /* App Promo */
+                .app-promo-section { padding: 120px 8vw; }
+                .promo-card { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; border-radius: 60px; }
+                .promo-text h2 { font-size: 3.5rem; margin-bottom: 20px; }
+                .promo-text p { color: var(--text-dim); margin-bottom: 40px; font-size: 1.2rem; }
+                .app-buttons { display: flex; gap: 20px; }
+                .app-btn { background: #fff; color: #000; border: none; padding: 14px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+                .app-btn:hover { transform: scale(1.05); }
+                .promo-img { position: relative; height: 400px; }
+                .mockup-frame { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 400px; background: rgba(255,255,255,0.02); border: 4px solid var(--glass-border); border-radius: 40px; }
+
+                /* Final CTA */
+                .cta-final { padding: 180px 8vw; text-align: center; position: relative; }
+                .cta-glow-bg { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(251, 146, 60, 0.08) 0%, transparent 70%); }
+                .cta-content-wrapper { position: relative; z-index: 1; }
+                .cta-content-wrapper h2 { font-size: 5rem; font-weight: 900; margin-bottom: 20px; letter-spacing: -4px; }
+                .cta-content-wrapper p { font-size: 1.4rem; color: var(--text-dim); margin-bottom: 50px; }
+                .btn-gold-cta { background: var(--accent-gold); color: #000; padding: 25px 80px; border-radius: 100px; font-weight: 900; text-decoration: none; font-size: 1.3rem; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+                .btn-gold-cta:hover { transform: scale(1.05); box-shadow: 0 40px 100px rgba(251, 146, 60, 0.3); }
+
+                /* Footer */
+                .landing-footer { padding: 100px 8vw 40px; background: #000; border-top: 1px solid var(--glass-border); }
+                .footer-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 100px; margin-bottom: 80px; }
+                .footer-brand-col .footer-logo { font-size: 2rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 20px; }
+                .footer-brand-col p { color: var(--text-dim); max-width: 300px; line-height: 1.6; }
+                .footer-links { display: flex; gap: 100px; }
+                .link-group h5 { font-size: 0.75rem; letter-spacing: 2px; color: #444; margin-bottom: 25px; }
+                .link-group { display: flex; flex-direction: column; gap: 12px; }
+                .link-group a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+                .link-group a:hover { color: #fff; }
+                .footer-bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 40px; color: #333; font-size: 0.75rem; }
+                .social-links { display: flex; gap: 20px; font-weight: 800; }
+
+                /* Scroll Indicator */
+                .scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0.6; z-index: 5; }
+                .mouse { width: 22px; height: 36px; border: 1.5px solid #fff; border-radius: 20px; position: relative; }
+                .wheel { width: 3px; height: 6px; background: var(--accent-gold); border-radius: 2px; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); animation: mouseWheel 2s linear infinite; }
+                @keyframes mouseWheel { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 15px); } }
+                .scroll-indicator span { font-size: 0.6rem; font-weight: 800; letter-spacing: 4px; color: #fff; }
+
+                @media (max-width: 1024px) {
+                    .process-layout, .footer-grid, .promo-card { grid-template-columns: 1fr; gap: 60px; }
+                    .footer-links { gap: 40px; flex-wrap: wrap; }
+                    .hero-root { text-align: center; justify-content: center; }
+                    .hero-content-container { align-items: center; }
+                    .hero-actions { justify-content: center; }
+                    .parallax-item { display: none; }
+                }
+                
+                @media (max-width: 768px) {
+                    .btn-gold-lg, .btn-glass-lg { width: 100%; text-align: center; }
+                    .cta-content-wrapper h2 { font-size: 3.5rem; letter-spacing: -2px; }
+                    .promo-text h2 { font-size: 2.5rem; }
+                    .app-buttons { flex-direction: column; }
+                    .new-tag { margin: 0 auto; }
+                }
+            `}</style>
         </div>
-      </section>
-    </div>
-  );
+    );
 };
 
 const StatusRow = ({ label, status }: { label: string; status: string }) => {
-  const active = status === 'live';
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-       <span style={{ fontSize: '0.85rem' }}>{label}</span>
-       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: active ? '#4ade80' : '#fbbf24', letterSpacing: '1px' }}>{status.toUpperCase()}</span>
-          <div className={`status-dot ${status}`} style={{ width: '8px', height: '8px', boxShadow: active ? '0 0 10px #4ade80' : 'none' }}></div>
-       </div>
-    </div>
-  );
+    const active = status === 'live';
+    return (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+           <span style={{ fontSize: '0.85rem', color: '#888' }}>{label}</span>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: active ? 'var(--success)' : '#fbbf24', letterSpacing: '1px' }}>{status.toUpperCase()}</span>
+              <div className={`status-dot ${status}`} style={{ width: '8px', height: '8px' }}></div>
+           </div>
+        </div>
+    );
 };
 
 export default Landing;

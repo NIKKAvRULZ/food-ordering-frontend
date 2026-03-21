@@ -116,10 +116,11 @@ const AdminDashboard: React.FC = () => {
                   price: 0, 
                   categoryName: 'General', 
                   imageUrl: '',
-                  isAvailable: 1,
+                  isAvailable: true, // Changed to boolean
+                  vegan: false, // Added vegan field
                   restaurantId: 1,
                   restaurantName: 'Gourmet Express',
-                  categoryId: 1 
+                  categoryId: categories.length > 0 ? categories[0].id : 1 // Use first category ID or default to 1
                 })} 
                 className="btn-gold" 
                 style={{ background: 'var(--success)' }}
@@ -268,11 +269,26 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div style={{ gridColumn: 'span 2' }}>
               <label htmlFor="edit-item-description" style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '8px', display: 'block' }}>SPECS / DESCRIPTION</label>
-              <textarea id="edit-item-description" style={{ gridColumn: 'span 2', width: '100%', padding: '15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', minHeight: '100px' }} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
+              <textarea id="edit-item-description" style={{ width: '100%', padding: '15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: '#fff', minHeight: '80px' }} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
             </div>
-            <div style={{ gridColumn: 'span 2', display: 'flex', gap: '15px', justifyContent: 'flex-end', marginTop: '10px' }}>
-              <button type="button" onClick={() => setEditForm(null)} className="btn-gold" style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>Discard Changes</button>
-              <button type="submit" className="btn-gold">Commit to Catalog</button>
+
+            <div style={{ gridColumn: 'span 2', display: 'flex', gap: '30px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={editForm.isAvailable} onChange={e => setEditForm({...editForm, isAvailable: e.target.checked})} style={{ width: '18px', height: '18px' }} />
+                <span style={{ fontSize: '0.9rem' }}>AVAILABLE IN STOCK</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={editForm.vegan} onChange={e => setEditForm({...editForm, vegan: e.target.checked})} style={{ width: '18px', height: '18px' }} />
+                <span style={{ fontSize: '0.9rem' }}>VEGAN OPTION</span>
+              </label>
+
+              <div style={{ flex: 1 }}></div>
+
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <button type="button" onClick={() => setEditForm(null)} className="btn-gold" style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>Discard Changes</button>
+                <button type="submit" className="btn-gold">Commit to Catalog</button>
+              </div>
             </div>
           </form>
         </div>

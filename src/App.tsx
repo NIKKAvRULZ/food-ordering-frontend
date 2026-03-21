@@ -26,6 +26,8 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     return user ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
+import PageTransition from './components/PageTransition';
+
 const App: React.FC = () => {
     return (
         <Router>
@@ -36,27 +38,29 @@ const App: React.FC = () => {
                         <CartPanel />
 
                         <main className="content">
-                            <Routes>
-                                {/* Public Routes */}
-                                <Route path="/" element={<Landing />} />
-                                <Route path="/register" element={<Register />} />
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/admin/login" element={<AdminLogin />} />
+                            <PageTransition>
+                                <Routes>
+                                    {/* Public Routes */}
+                                    <Route path="/" element={<Landing />} />
+                                    <Route path="/register" element={<Register />} />
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/admin/login" element={<AdminLogin />} />
 
-                                {/* Guarded Routes */}
-                                <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} /> 
-                                <Route path="/menu" element={<PrivateRoute><MenuCatalog /></PrivateRoute>} />
-                                <Route path="/profile/:id" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                                <Route path="/payments/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
-                                <Route path="/payments/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
-                                <Route path="/payments" element={<PrivateRoute><UserPayments /></PrivateRoute>} />
-                                <Route path="/orders" element={<PrivateRoute><UserOrders /></PrivateRoute>} />
-                                <Route path="/payments/:id" element={<PrivateRoute><PaymentDetail /></PrivateRoute>} />
-                                <Route path="/payments/:id/invoice" element={<PrivateRoute><PaymentInvoice /></PrivateRoute>} />
-                                
-                                {/* Admin Guarded (Assuming separate logic or just open for now) */}
-                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                            </Routes>
+                                    {/* Guarded Routes */}
+                                    <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} /> 
+                                    <Route path="/menu" element={<PrivateRoute><MenuCatalog /></PrivateRoute>} />
+                                    <Route path="/profile/:id" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                                    <Route path="/payments/checkout" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+                                    <Route path="/payments/checkout/:orderId" element={<PrivateRoute><PaymentCheckout /></PrivateRoute>} />
+                                    <Route path="/payments" element={<PrivateRoute><UserPayments /></PrivateRoute>} />
+                                    <Route path="/orders" element={<PrivateRoute><UserOrders /></PrivateRoute>} />
+                                    <Route path="/payments/:id" element={<PrivateRoute><PaymentDetail /></PrivateRoute>} />
+                                    <Route path="/payments/:id/invoice" element={<PrivateRoute><PaymentInvoice /></PrivateRoute>} />
+                                    
+                                    {/* Admin Guarded (Assuming separate logic or just open for now) */}
+                                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                                </Routes>
+                            </PageTransition>
                         </main>
                     </div>
                 </CartProvider>
