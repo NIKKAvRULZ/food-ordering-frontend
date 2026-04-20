@@ -4,7 +4,7 @@ const API_BASE_URL = `${import.meta.env.VITE_IDENTITY_URL}/api/users`;
 const CATALOG_URL = import.meta.env.VITE_CATALOG_URL;
 const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_URL;
 const ORDER_URL = import.meta.env.VITE_ORDER_URL;
-const PAYMENT_URL = import.meta.env.VITE_PAYMENT_URL;
+const PAYMENT_URL = import.meta.env.VITE_PAYMENT_URL || 'https://food-payment.onrender.com';
 
 // Intercept requests to add JWT Token Auth Header
 axios.interceptors.request.use((config) => {
