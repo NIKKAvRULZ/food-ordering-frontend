@@ -102,6 +102,13 @@ body {
   transform: translateY(-1px) scale(1);
 }
 
+/* Filter Buttons Resiliency */
+.filter-btn {
+  border-radius: 100px !important;
+  border: none !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
 /* Status Indicators */
 .status-dot {
   width: 10px;
