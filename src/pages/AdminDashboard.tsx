@@ -355,7 +355,7 @@ const AdminDashboard: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '15px' }}>
                 <button type="button" onClick={() => setEditForm(null)} className="btn-gold" style={{ background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>Discard Changes</button>
-                <button type="submit" className="btn-gold">Commit to Catalog</button>
+                <button type="submit" className="btn-gold">Commit to test</button>
               </div>
             </div>
           </form>
